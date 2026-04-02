@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Panel 🌸 GrupIntro</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #0d0a0f;
+      --surface: rgba(30,18,35,0.95);
+      --card: rgba(40,24,48,0.85);
+      --border: rgba(240,98,146,0.18);
+      --border2: rgba(240,98,146,0.32);
+      --accent: #f06292;
+      --accent2: #ec407a;
+      --accent3: #ff80ab;
+      --gold: #ffd700;
+      --silver: #c0c0c0;
+      --teal: #4dd0e1;
+      --purple: #ce93d8;
+      --text: #f8e8f0;
+      --muted: #b08090;
+      --muted2: #7a5060;
+      --glow: rgba(240,98,146,0.25);
+    }
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Nunito', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    body::before {
+      content:'';position:fixed;inset:0;
+      background-image:
+        radial-gradient(rgba(240,98,146,0.04) 1px, transparent 1px);
+      background-size: 32px 32px;
+      pointer-events:none;z-index:0;
+    }
+    .bg-glow {
+      position:fixed;pointer-events:none;z-index:0;border-radius:50%;filter:blur(100px);
+    }
+    .bg-glow-1 { width:600px;height:600px;background:rgba(240,98,146,0.08);top:-200px;left:-200px; }
+    .bg-glow-2 { width:400px;height:400px;background:rgba(206,147,216,0.06);bottom:-100px;right:-100px; }
+    .bg-glow-3 { width:300px;height:300px;background:rgba(77,208,225,0.04);top:40%;left:40%; }
+
+    /* ===== LOGIN ===== */
+    #loginScreen {
+      position:fixed;inset:0;z-index:999;
+      display:flex;align-items:center;justify-content:center;
+      background: radial-gradient(ellipse at center, rgba(40,18,35,0.98) 0%, rgba(13,10,15,0.99) 100%);
+      backdrop-filter:blur(20px);
+    }
+    .login-box {
+      width:100%;max-width:400px;padding:48px 40px;
+      background:rgba(30,18,35,0.9);
+      border:1px solid var(--border2);
+      border-radius:28px;
+      box-shadow:0 0 60px rgba(240,98,146,0.1),0 20px 60px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.05);
+      animation: loginIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
+      position:relative;z-index:1;
+    }
+    @keyframes loginIn { from{opacity:0;transform:translateY(30px) scale(0.95);} to{opacity:1;transform:none;} }
+    .login-logo {
+      text-align:center;margin-bottom:32px;
+    }
+    .login-logo .badge {
+      display:inline-flex;align-items:center;gap:8px;
+      padding:6px 16px;border-radius:100px;
+      background:rgba(240,98,146,0.1);border:1px solid var(--border2);
+      font-size:0.7rem;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;
+      color:var(--accent);margin-bottom:14px;
+    }
+    .login-logo h1 {
+      font-size:1.8rem;font-weight:900;color:var(--text);
+      background:linear-gradient(135deg,#fff 0%,#f06292 60%,#ff80ab 100%);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+    }
+    .login-logo p { font-size:0.85rem;color:var(--muted);margin-top:6px;font-weight:600; }
+    .login-field { margin-bottom:16px; }
+    .login-field label {
+      display:block;font-size:0.75rem;font-weight:800;letter-spacing:0.08em;
+      text-transform:uppercase;color:var(--muted);margin-bottom:7px;
+    }
+    .login-field input {
+      width:100%;padding:12px 16px;border-radius:12px;
+      background:rgba(255,255,255,0.04);
+      border:1.5px solid rgba(240,98,146,0.2);
+      color:var(--text);font-family:'JetBrains Mono',monospace;
+      font-size:1rem;font-weight:600;outline:none;transition:all 0.2s;
+      letter-spacing:0.1em;
+    }
+    .login-field input:focus {
+      border-color:var(--accent);
+      background:rgba(240,98,146,0.05);
+      box-shadow:0 0 0 3px rgba(240,98,146,0.1);
+    }
+    .login-btn {
+      width:100%;padding:14px;border-radius:14px;border:none;
+      background:linear-gradient(135deg,#f06292,#ec407a,#f48fb1);
+      color:#fff;font-family:'Nunito',sans-serif;font-size:1rem;font-weight:900;
+      cursor:pointer;transition:all 0.22s;letter-spacing:0.05em;margin-top:8px;
+      box-shadow:0 4px 24px rgba(236,64,122,0.35);
+    }
+    .login-btn:hover { transform:translateY(-2px);box-shadow:0 8px 32px rgba(236,64,122,0.45); }
+    .login-btn:active { transform:translateY(0); }
+    .login-err {
+      display:none;margin-top:12px;padding:10px 14px;border-radius:10px;
+      background:rgba(255,80,80,0.1);border:1px solid rgba(255,80,80,0.25);
+      color:#ff8a80;font-size:0.83rem;font-weight:700;text-align:center;
+    }
+
+    /* ===== MAIN PANEL ===== */
+    #adminPanel { display:none;position:relative;z-index:1;min-height:100vh; }
+
+    /* TOP BAR */
+    .topbar {
+      position:sticky;top:0;z-index:100;
+      display:flex;align-items:center;justify-content:space-between;
+      padding:0 28px;height:62px;
+      background:rgba(13,10,15,0.85);
+      backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
+      border-bottom:1px solid var(--border);
+      box-shadow:0 2px 24px rgba(0,0,0,0.4);
+    }
+    .topbar-left { display:flex;align-items:center;gap:14px; }
+    .topbar-logo {
+      font-weight:900;font-size:1.1rem;
+      background:linear-gradient(135deg,#fff,#f06292,#ff80ab);
+      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+    }
+    .topbar-sep { width:1px;height:24px;background:var(--border); }
+    .topbar-sub { font-size:0.75rem;font-weight:700;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase; }
+    .topbar-right { display:flex;align-items:center;gap:10px; }
+    .logout-btn {
+      padding:7px 16px;border-radius:100px;border:1px solid var(--border2);
+      background:transparent;color:var(--accent);
+      font-family:'Nunito',sans-serif;font-size:0.8rem;font-weight:800;cursor:pointer;
+      transition:all 0.2s;letter-spacing:0.04em;
+    }
+    .logout-btn:hover { background:rgba(240,98,146,0.1);border-color:var(--accent); }
+
+    /* STATS */
+    .stats-row {
+      display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+      gap:14px;padding:24px 28px 0;
+    }
+    .stat-card {
+      background:var(--card);backdrop-filter:blur(16px);
+      border:1px solid var(--border);border-radius:18px;
+      padding:18px 20px;position:relative;overflow:hidden;
+      transition:all 0.22s;
+    }
+    .stat-card::before {
+      content:'';position:absolute;top:0;left:0;right:0;height:2px;
+      background:linear-gradient(90deg,var(--accent),var(--accent3));
+    }
+    .stat-card:hover { border-color:var(--border2);box-shadow:0 4px 24px rgba(240,98,146,0.12); }
+    .stat-num {
+      font-family:'JetBrains Mono',monospace;font-size:2rem;font-weight:700;
+      color:var(--accent);line-height:1;margin-bottom:4px;
+    }
+    .stat-label { font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em; }
+
+    /* CONTENT */
+    .content { padding:24px 28px 80px; }
+    .section-title {
+      font-size:0.7rem;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;
+      color:var(--accent);margin-bottom:16px;display:flex;align-items:center;gap:8px;
+    }
+    .section-title::after { content:'';flex:1;height:1px;background:linear-gradient(to right,var(--border),transparent); }
+
+    /* FILTERS */
+    .filters {
+      display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;align-items:center;
+    }
+    .filter-btn {
+      padding:6px 14px;border-radius:100px;border:1px solid var(--border);
+      background:transparent;color:var(--muted);
+      font-family:'Nunito',sans-serif;font-size:0.78rem;font-weight:700;
+      cursor:pointer;transition:all 0.18s;
+    }
+    .filter-btn:hover { border-color:var(--border2);color:var(--accent3); }
+    .filter-btn.active { background:rgba(240,98,146,0.12);border-color:var(--accent);color:var(--accent); }
+    .search-box {
+      margin-left:auto;padding:6px 14px;border-radius:100px;
+      border:1px solid var(--border);background:rgba(255,255,255,0.03);
+      color:var(--text);font-family:'Nunito',sans-serif;font-size:0.82rem;font-weight:600;
+      outline:none;transition:all 0.2s;min-width:180px;
+    }
+    .search-box:focus { border-color:var(--accent);background:rgba(240,98,146,0.05); }
+    .search-box::placeholder { color:var(--muted2); }
+
+    /* TABLE */
+    .table-wrap {
+      background:var(--card);border:1px solid var(--border);border-radius:20px;
+      overflow:hidden;overflow-x:auto;
+    }
+    table { width:100%;border-collapse:collapse;min-width:700px; }
+    thead tr {
+      background:rgba(240,98,146,0.06);
+      border-bottom:1px solid var(--border);
+    }
+    thead th {
+      padding:13px 16px;font-size:0.7rem;font-weight:800;letter-spacing:0.1em;
+      text-transform:uppercase;color:var(--muted);text-align:left;white-space:nowrap;
+    }
+    tbody tr {
+      border-bottom:1px solid rgba(240,98,146,0.07);
+      transition:background 0.15s;
+    }
+    tbody tr:last-child { border-bottom:none; }
+    tbody tr:hover { background:rgba(240,98,146,0.04); }
+    td { padding:13px 16px;font-size:0.87rem;font-weight:600;color:var(--text);vertical-align:middle; }
+
+    /* LABELS */
+    .label-badge {
+      display:inline-flex;align-items:center;gap:4px;
+      padding:3px 10px;border-radius:100px;
+      font-size:0.68rem;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;
+      white-space:nowrap;
+    }
+    .label-OWNER {
+      background:linear-gradient(135deg,rgba(255,215,0,0.18),rgba(255,180,0,0.12));
+      border:1px solid rgba(255,215,0,0.4);color:#ffd700;
+      box-shadow:0 0 10px rgba(255,215,0,0.12);
+    }
+    .label-ADMIN {
+      background:linear-gradient(135deg,rgba(240,98,146,0.22),rgba(255,128,171,0.15));
+      border:1px solid rgba(240,98,146,0.45);color:#f06292;
+      box-shadow:0 0 10px rgba(240,98,146,0.15);
+    }
+    .label-MEMBER {
+      background:rgba(77,208,225,0.1);border:1px solid rgba(77,208,225,0.3);color:#4dd0e1;
+    }
+    .label-ANOMALI {
+      background:rgba(206,147,216,0.12);border:1px solid rgba(206,147,216,0.35);color:#ce93d8;
+    }
+    .label-DEV { background:rgba(100,220,100,0.12);border:1px solid rgba(100,220,100,0.35);color:#81c784; }
+
+    /* ACTIONS */
+    .act-btn {
+      padding:5px 12px;border-radius:8px;border:none;font-family:'Nunito',sans-serif;
+      font-size:0.75rem;font-weight:800;cursor:pointer;transition:all 0.18s;
+      display:inline-flex;align-items:center;gap:4px;
+    }
+    .act-del { background:rgba(255,80,80,0.1);color:#ff8a80;border:1px solid rgba(255,80,80,0.2); }
+    .act-del:hover { background:rgba(255,80,80,0.2);border-color:rgba(255,80,80,0.4); }
+    .act-comment { background:rgba(240,98,146,0.1);color:var(--accent3);border:1px solid var(--border); }
+    .act-comment:hover { background:rgba(240,98,146,0.18);border-color:var(--border2); }
+    .act-label { background:rgba(255,215,0,0.08);color:#ffd700;border:1px solid rgba(255,215,0,0.2); }
+    .act-label:hover { background:rgba(255,215,0,0.15);border-color:rgba(255,215,0,0.35); }
+    .actions-cell { display:flex;gap:6px;flex-wrap:wrap;align-items:center; }
+
+    /* COMMENTS in table */
+    .comment-bubble {
+      display:inline-flex;align-items:center;gap:5px;
+      background:rgba(240,98,146,0.08);border:1px solid var(--border);
+      border-radius:8px;padding:4px 10px;font-size:0.75rem;color:var(--muted);
+      font-weight:600;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    }
+
+    /* MODAL */
+    .modal-overlay {
+      display:none;position:fixed;inset:0;z-index:200;
+      background:rgba(13,10,15,0.85);backdrop-filter:blur(8px);
+      align-items:center;justify-content:center;padding:20px;
+    }
+    .modal-overlay.show { display:flex; }
+    .modal-box {
+      background:rgba(30,18,35,0.98);border:1px solid var(--border2);
+      border-radius:24px;padding:32px;width:100%;max-width:480px;
+      box-shadow:0 20px 80px rgba(0,0,0,0.6),0 0 40px rgba(240,98,146,0.1);
+      animation:modalIn 0.28s cubic-bezier(0.34,1.56,0.64,1) both;
+    }
+    @keyframes modalIn { from{opacity:0;transform:scale(0.92) translateY(20px);} to{opacity:1;transform:none;} }
+    .modal-title {
+      font-size:1rem;font-weight:900;color:var(--text);margin-bottom:4px;
+    }
+    .modal-sub { font-size:0.8rem;color:var(--muted);margin-bottom:22px;font-weight:600; }
+    .modal-field { margin-bottom:14px; }
+    .modal-field label {
+      display:block;font-size:0.72rem;font-weight:800;letter-spacing:0.08em;
+      text-transform:uppercase;color:var(--muted);margin-bottom:7px;
+    }
+    .modal-field textarea, .modal-field select, .modal-field input {
+      width:100%;padding:10px 14px;border-radius:12px;
+      background:rgba(255,255,255,0.04);border:1.5px solid rgba(240,98,146,0.2);
+      color:var(--text);font-family:'Nunito',sans-serif;font-size:0.9rem;font-weight:600;
+      outline:none;transition:all 0.2s;resize:vertical;
+    }
+    .modal-field textarea:focus, .modal-field select:focus, .modal-field input:focus {
+      border-color:var(--accent);background:rgba(240,98,146,0.05);
+      box-shadow:0 0 0 3px rgba(240,98,146,0.08);
+    }
+    .modal-field select option { background:#1a0e22;color:var(--text); }
+    .modal-actions { display:flex;gap:10px;margin-top:20px; }
+    .modal-confirm {
+      flex:1;padding:11px;border-radius:12px;border:none;
+      background:linear-gradient(135deg,#f06292,#ec407a);
+      color:#fff;font-family:'Nunito',sans-serif;font-size:0.9rem;font-weight:900;
+      cursor:pointer;transition:all 0.2s;
+    }
+    .modal-confirm:hover { transform:translateY(-1px);box-shadow:0 6px 20px rgba(236,64,122,0.35); }
+    .modal-cancel {
+      flex:1;padding:11px;border-radius:12px;
+      border:1px solid var(--border2);background:transparent;
+      color:var(--muted);font-family:'Nunito',sans-serif;font-size:0.9rem;font-weight:800;
+      cursor:pointer;transition:all 0.2s;
+    }
+    .modal-cancel:hover { background:rgba(255,255,255,0.04);color:var(--text); }
+
+    /* LABEL PICKER in modal */
+    .label-picker { display:flex;gap:8px;flex-wrap:wrap; }
+    .label-opt {
+      padding:7px 14px;border-radius:10px;border:1.5px solid transparent;
+      font-family:'Nunito',sans-serif;font-size:0.78rem;font-weight:800;
+      cursor:pointer;transition:all 0.2s;letter-spacing:0.05em;text-transform:uppercase;
+    }
+    .label-opt[data-lbl="OWNER"] { color:#ffd700;border-color:rgba(255,215,0,0.25);background:rgba(255,215,0,0.06); }
+    .label-opt[data-lbl="ADMIN"] { color:#f06292;border-color:rgba(240,98,146,0.25);background:rgba(240,98,146,0.06); }
+    .label-opt[data-lbl="MEMBER"] { color:#4dd0e1;border-color:rgba(77,208,225,0.25);background:rgba(77,208,225,0.06); }
+    .label-opt[data-lbl="ANOMALI"] { color:#ce93d8;border-color:rgba(206,147,216,0.25);background:rgba(206,147,216,0.06); }
+    .label-opt[data-lbl="DEV"] { color:#81c784;border-color:rgba(100,220,100,0.25);background:rgba(100,220,100,0.06); }
+    .label-opt.active[data-lbl="OWNER"] { background:rgba(255,215,0,0.18);border-color:rgba(255,215,0,0.5);box-shadow:0 0 14px rgba(255,215,0,0.15); }
+    .label-opt.active[data-lbl="ADMIN"] { background:rgba(240,98,146,0.2);border-color:rgba(240,98,146,0.5);box-shadow:0 0 14px rgba(240,98,146,0.18); }
+    .label-opt.active[data-lbl="MEMBER"] { background:rgba(77,208,225,0.16);border-color:rgba(77,208,225,0.5);box-shadow:0 0 14px rgba(77,208,225,0.12); }
+    .label-opt.active[data-lbl="ANOMALI"] { background:rgba(206,147,216,0.18);border-color:rgba(206,147,216,0.5);box-shadow:0 0 14px rgba(206,147,216,0.12); }
+    .label-opt.active[data-lbl="DEV"] { background:rgba(100,220,100,0.18);border-color:rgba(100,220,100,0.5);box-shadow:0 0 14px rgba(100,220,100,0.12); }
+
+    /* TOAST */
+    .toast {
+      position:fixed;bottom:24px;right:24px;z-index:999;
+      padding:12px 20px;border-radius:14px;
+      background:rgba(30,18,35,0.95);border:1px solid var(--border2);
+      color:var(--text);font-size:0.85rem;font-weight:700;
+      box-shadow:0 8px 32px rgba(0,0,0,0.4);
+      animation:toastIn 0.3s ease both;
+      display:none;
+    }
+    @keyframes toastIn { from{opacity:0;transform:translateY(16px);} to{opacity:1;transform:none;} }
+
+    /* EMPTY */
+    .empty-admin { text-align:center;padding:60px 20px;color:var(--muted2); }
+    .empty-admin .e-icon { font-size:3rem;margin-bottom:12px; }
+    .empty-admin p { font-size:0.9rem;font-weight:600; }
+
+    /* PHOTO PREVIEW */
+    .photo-tiny {
+      width:36px;height:36px;border-radius:8px;object-fit:cover;
+      border:1px solid var(--border);vertical-align:middle;
+    }
+    .sticker-tiny { font-size:1.6rem;line-height:1; }
+
+
+    /* INFO SECTION */
+    .info-section-wrap { margin-top:28px; }
+    .info-form-card {
+      background:var(--card);border:1px solid var(--border);border-radius:20px;
+      padding:24px;margin-bottom:20px;
+    }
+    .info-form-grid { display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px; }
+    .info-form-full { grid-column:1/-1; }
+    .info-field { display:flex;flex-direction:column;gap:6px; }
+    .info-field label {
+      font-size:0.7rem;font-weight:800;letter-spacing:0.09em;text-transform:uppercase;color:var(--muted);
+    }
+    .info-field input, .info-field textarea, .info-field select {
+      padding:10px 14px;border-radius:12px;border:1.5px solid rgba(240,98,146,0.18);
+      background:rgba(255,255,255,0.03);color:var(--text);
+      font-family:'Nunito',sans-serif;font-size:0.9rem;font-weight:600;outline:none;transition:all 0.2s;resize:vertical;
+    }
+    .info-field input:focus, .info-field textarea:focus, .info-field select:focus {
+      border-color:var(--accent);background:rgba(240,98,146,0.05);box-shadow:0 0 0 3px rgba(240,98,146,0.08);
+    }
+    .info-field select option { background:#1a0e22;color:var(--text); }
+    .info-type-picker { display:flex;gap:8px;flex-wrap:wrap; }
+    .itype-btn {
+      flex:1;min-width:80px;padding:8px 10px;border-radius:12px;border:1.5px solid rgba(240,98,146,0.2);
+      background:rgba(255,255,255,0.03);font-family:'Nunito',sans-serif;font-size:0.78rem;font-weight:800;
+      cursor:pointer;transition:all 0.2s;text-align:center;color:var(--muted);
+    }
+    .itype-btn:hover { border-color:var(--border2);color:var(--accent3); }
+    .itype-btn.active-umum { background:rgba(240,98,146,0.15);border-color:rgba(240,98,146,0.5);color:#f06292; }
+    .itype-btn.active-urgent { background:rgba(255,82,82,0.15);border-color:rgba(255,82,82,0.5);color:#ff5252; }
+    .itype-btn.active-info { background:rgba(66,165,245,0.15);border-color:rgba(66,165,245,0.5);color:#42a5f5; }
+    .itype-btn.active-event { background:rgba(171,71,188,0.15);border-color:rgba(171,71,188,0.5);color:#ab47bc; }
+    .itype-btn.active-dev   { background:rgba(100,220,100,0.15);border-color:rgba(100,220,100,0.5);color:#81c784; }
+    .add-info-btn {
+      padding:12px 24px;border-radius:12px;border:none;
+      background:linear-gradient(135deg,#f06292,#ec407a);color:#fff;
+      font-family:'Nunito',sans-serif;font-size:0.9rem;font-weight:900;cursor:pointer;transition:all 0.2s;
+      box-shadow:0 4px 16px rgba(240,98,146,0.3);
+    }
+    .add-info-btn:hover { transform:translateY(-1px);box-shadow:0 6px 20px rgba(240,98,146,0.4); }
+
+    /* INFO LIST ADMIN */
+    .info-admin-list { display:flex;flex-direction:column;gap:12px; }
+    .info-admin-card {
+      background:var(--card);border:1px solid var(--border);border-radius:18px;
+      overflow:hidden;transition:all 0.2s;
+    }
+    .info-admin-card:hover { border-color:var(--border2); }
+    .iac-accent { height:3px; }
+    .iac-umum { background:linear-gradient(90deg,#f06292,#ec407a); }
+    .iac-urgent { background:linear-gradient(90deg,#ff5252,#f44336); }
+    .iac-info { background:linear-gradient(90deg,#42a5f5,#1e88e5); }
+    .iac-event { background:linear-gradient(90deg,#ab47bc,#8e24aa); }
+    .iac-dev   { background:linear-gradient(90deg,#66bb6a,#43a047); }
+    .iac-body { padding:16px 18px; }
+    .iac-top { display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:8px; }
+    .iac-title { font-size:0.95rem;font-weight:900;color:var(--text);flex:1; }
+    .iac-del { padding:4px 12px;border-radius:8px;border:1px solid rgba(255,80,80,0.25);
+      background:rgba(255,80,80,0.08);color:#ff8a80;font-family:'Nunito',sans-serif;
+      font-size:0.75rem;font-weight:800;cursor:pointer;transition:all 0.18s;white-space:nowrap; }
+    .iac-del:hover { background:rgba(255,80,80,0.2);border-color:rgba(255,80,80,0.45); }
+    .iac-content { font-size:0.83rem;color:var(--muted);line-height:1.6;font-weight:500;margin-bottom:10px; }
+    .iac-meta { display:flex;gap:8px;align-items:center;flex-wrap:wrap; }
+    .iac-badge {
+      padding:2px 9px;border-radius:100px;font-size:0.65rem;font-weight:800;letter-spacing:0.07em;text-transform:uppercase;
+    }
+    .iac-badge-umum { background:rgba(240,98,146,0.1);border:1px solid rgba(240,98,146,0.3);color:#f06292; }
+    .iac-badge-urgent { background:rgba(255,82,82,0.1);border:1px solid rgba(255,82,82,0.3);color:#ff5252; }
+    .iac-badge-info { background:rgba(66,165,245,0.1);border:1px solid rgba(66,165,245,0.3);color:#42a5f5; }
+    .iac-badge-event { background:rgba(171,71,188,0.1);border:1px solid rgba(171,71,188,0.3);color:#ab47bc; }
+    .iac-badge-dev   { background:rgba(100,220,100,0.1);border:1px solid rgba(100,220,100,0.3);color:#81c784; }
+    .iac-date { font-size:0.72rem;color:var(--muted2);font-weight:700; }
+    .info-empty-admin { text-align:center;padding:40px;color:var(--muted2);font-weight:700;font-size:0.88rem; }
+
+    @media(max-width:600px) {
+      .info-form-grid { grid-template-columns:1fr; }
+    }
+    /* RESPONSIVE */
+    @media(max-width:600px) {
+      .topbar { padding:0 14px; }
+      .topbar-sub { display:none; }
+      .stats-row { padding:16px 14px 0;gap:10px; }
+      .content { padding:16px 14px 60px; }
+      thead th, td { padding:10px 10px; }
+      .search-box { min-width:120px;width:100%; }
+      .filters { gap:6px; }
+      .modal-box { padding:22px 18px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="bg-glow bg-glow-1"></div>
+<div class="bg-glow bg-glow-2"></div>
+<div class="bg-glow bg-glow-3"></div>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="badge">🔐 Restricted Access</div>
+      <h1>Admin Panel</h1>
+      <p>GrupIntro 🌸 — Hanya untuk admin ya!</p>
+    </div>
+    <div class="login-field">
+      <label>Username</label>
+      <input type="text" id="loginUser" placeholder="Username..." autocomplete="off"/>
+    </div>
+    <div class="login-field">
+      <label>Password</label>
+      <input type="password" id="loginPass" placeholder="••••••" autocomplete="off"
+        />
+    </div>
+    <button class="login-btn" >🌸 Masuk Panel</button>
+    <div class="login-err" id="loginErr">❌ Username atau password salah!</div>
+  </div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div id="adminPanel">
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-logo">🌸 GrupIntro</div>
+      <div class="topbar-sep"></div>
+      <div class="topbar-sub">Admin Panel</div>
+    </div>
+    <div class="topbar-right">
+      <span style="font-size:0.78rem;color:var(--muted);font-weight:700;">👤 Admin</span>
+      <button class="logout-btn" >Logout</button>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-row" id="statsRow">
+    <div class="stat-card">
+      <div class="stat-num" id="statTotal">0</div>
+      <div class="stat-label">Total Member</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="statOwner" style="color:#ffd700;">0</div>
+      <div class="stat-label">Owner</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="statAdmin">0</div>
+      <div class="stat-label">Admin</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="statMember" style="color:#4dd0e1;">0</div>
+      <div class="stat-label">Member</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="statAnomali" style="color:#ce93d8;">0</div>
+      <div class="stat-label">Anomali</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="statDev" style="color:#81c784;">0</div>
+      <div class="stat-label">Dev</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num" id="statInfo" style="color:#ff80ab;">0</div>
+      <div class="stat-label">Total Info</div>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+    <div class="section-title">📋 Semua Intro Member</div>
+
+    <div class="filters">
+      <button class="filter-btn active" >Semua</button>
+      <button class="filter-btn" >👑 Owner</button>
+      <button class="filter-btn" >🌸 Admin</button>
+      <button class="filter-btn" >💙 Member</button>
+      <button class="filter-btn" >🌀 Anomali</button>
+      <input class="search-box" placeholder="🔍 Cari nama..." oninput="renderTable()" id="searchBox"/>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Foto</th>
+            <th>Nama</th>
+            <th>Umur</th>
+            <th>Asal</th>
+            <th>Gender</th>
+            <th>Label</th>
+            <th>Komentar Admin</th>
+            <th>Tanggal</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody"></tbody>
+      </table>
+      <div class="empty-admin" id="emptyAdmin" style="display:none;">
+        <div class="e-icon">🌸</div>
+        <p>Belum ada intro yang masuk.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- INFO MANAGEMENT -->
+  <div class="info-section-wrap">
+    <div class="section-title">📢 Kelola Info & Pengumuman</div>
+    
+    <!-- ADD INFO FORM -->
+    <div class="info-form-card">
+      <div style="font-size:0.75rem;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;color:var(--accent);margin-bottom:16px;">➕ Tambah Info Baru</div>
+      <div style="margin-bottom:12px;">
+        <div class="info-field" style="margin-bottom:4px;"><label>Tipe Info</label></div>
+        <div class="info-type-picker">
+          <button class="itype-btn active-umum" data-itype="umum" >📌 Umum</button>
+          <button class="itype-btn" data-itype="urgent" >🚨 Urgent</button>
+          <button class="itype-btn" data-itype="info" >ℹ️ Info</button>
+          <button class="itype-btn" data-itype="event" >🎉 Event</button>
+          <button class="itype-btn" data-itype="dev" >⚙️ Dev</button>
+        </div>
+      </div>
+      <div class="info-form-grid">
+        <div class="info-field info-form-full">
+          <label>Judul</label>
+          <input type="text" id="infoTitle" placeholder="Judul pengumuman..."/>
+        </div>
+        <div class="info-field info-form-full">
+          <label>Isi Info</label>
+          <textarea id="infoContent" rows="4" placeholder="Tulis info atau pengumuman di sini..."></textarea>
+        </div>
+        <div class="info-field">
+          <label>Dari (Nama Admin)</label>
+          <input type="text" id="infoAuthor" placeholder="Admin / Owner..." value="Admin"/>
+        </div>
+        <div class="info-field info-form-full">
+          <label>🖼️ Link Foto (opsional — .jpg, .png, dll)</label>
+          <input type="url" id="infoPhoto" placeholder="https://i.ibb.co/xxx/foto.jpg — kosongkan jika tidak ada foto"/>
+        </div>
+      </div>
+      <button class="add-info-btn" >📢 Posting Info</button>
+    </div>
+
+    <!-- INFO LIST -->
+    <div class="section-title">📋 Daftar Info Aktif</div>
+    <div id="infoAdminList"><div class="info-empty-admin">Belum ada info yang diposting.</div></div>
+  </div>
+</div>
+
+<!-- MODAL KOMENTAR -->
+<div class="modal-overlay" id="modalComment">
+  <div class="modal-box">
+    <div class="modal-title">💬 Komentar Admin</div>
+    <div class="modal-sub" id="modalCommentSub">Tambah komentar untuk member ini</div>
+    <div class="modal-field">
+      <label>Komentar</label>
+      <textarea id="commentInput" rows="4" placeholder="Tulis komentar untuk member ini..."></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-cancel" >Batal</button>
+      <button class="modal-confirm" >💾 Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL LABEL -->
+<div class="modal-overlay" id="modalLabel">
+  <div class="modal-box">
+    <div class="modal-title">🏷️ Atur Label</div>
+    <div class="modal-sub" id="modalLabelSub">Pilih label untuk member ini</div>
+    <div class="modal-field">
+      <label>Pilih Label</label>
+      <div class="label-picker">
+        <div class="label-opt" data-lbl="OWNER" >👑 OWNER</div>
+        <div class="label-opt" data-lbl="ADMIN" >🌸 ADMIN</div>
+        <div class="label-opt" data-lbl="MEMBER" >💙 MEMBER</div>
+        <div class="label-opt" data-lbl="ANOMALI" >🌀 ANOMALI</div>
+        <div class="label-opt" data-lbl="DEV" >⚙️ DEV</div>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-cancel" >Batal</button>
+      <button class="modal-confirm" >💾 Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL HAPUS -->
+<div class="modal-overlay" id="modalDelete">
+  <div class="modal-box">
+    <div class="modal-title">🗑️ Hapus Intro?</div>
+    <div class="modal-sub" id="modalDeleteSub">Yakin mau hapus intro ini? Ga bisa balik lagi ya!</div>
+    <div class="modal-actions">
+      <button class="modal-cancel" >Batal</button>
+      <button class="modal-confirm" style="background:linear-gradient(135deg,#f44336,#e53935);" >🗑️ Hapus</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+
+<script>
+  // ===== FIREBASE via fetch (REST API - works tanpa CDN, tanpa server) =====
+  var FIREBASE_PROJECT = 'website-intro-ab3e7';
+  var FIREBASE_API_KEY = 'AIzaSyABbV5Ap3YcGxT6UYE4BVgPlTU63EVYArA';
+  var FIREBASE_BASE = 'https://firestore.googleapis.com/v1/projects/' + FIREBASE_PROJECT + '/databases/(default)/documents';
+  var firebaseReady = false;
+  var unsubIntros = null;
+  var unsubInfos  = null;
+
+  // ===== Helper: Firestore REST value encoder =====
+  function toFSValue(val) {
+    if (val === null || val === undefined) return { nullValue: null };
+    if (typeof val === 'boolean') return { booleanValue: val };
+    if (typeof val === 'number') return { integerValue: String(val) };
+    if (typeof val === 'string') return { stringValue: val };
+    if (typeof val === 'object') {
+      var fields = {};
+      Object.keys(val).forEach(function(k) { fields[k] = toFSValue(val[k]); });
+      return { mapValue: { fields: fields } };
+    }
+    return { stringValue: String(val) };
+  }
+
+  function fromFSValue(v) {
+    if (!v) return null;
+    if ('stringValue'  in v) return v.stringValue;
+    if ('integerValue' in v) return Number(v.integerValue);
+    if ('doubleValue'  in v) return v.doubleValue;
+    if ('booleanValue' in v) return v.booleanValue;
+    if ('nullValue'    in v) return null;
+    if ('timestampValue' in v) return v.timestampValue;
+    if ('mapValue'     in v) {
+      var obj = {};
+      var f = v.mapValue.fields || {};
+      Object.keys(f).forEach(function(k) { obj[k] = fromFSValue(f[k]); });
+      return obj;
+    }
+    if ('arrayValue' in v) return (v.arrayValue.values || []).map(fromFSValue);
+    return null;
+  }
+
+  function docToObj(doc) {
+    var obj = { _id: doc.name.split('/').pop() };
+    var fields = doc.fields || {};
+    Object.keys(fields).forEach(function(k) { obj[k] = fromFSValue(fields[k]); });
+    return obj;
+  }
+
+  function objToFields(obj) {
+    var fields = {};
+    Object.keys(obj).forEach(function(k) {
+      if (k === '_id') return;
+      fields[k] = toFSValue(obj[k]);
+    });
+    return fields;
+  }
+
+  // ===== Firebase REST calls =====
+  function fbGet(col) {
+    return fetch(FIREBASE_BASE + '/' + col + '?key=' + FIREBASE_API_KEY)
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (!data.documents) return [];
+        return data.documents.map(docToObj);
+      });
+  }
+
+  function fbAdd(col, obj) {
+    return fetch(FIREBASE_BASE + '/' + col + '?key=' + FIREBASE_API_KEY, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fields: objToFields(obj) })
+    }).then(function(r) { return r.json(); });
+  }
+
+  function fbUpdate(col, id, obj) {
+    var fields = objToFields(obj);
+    var mask = Object.keys(fields).map(function(k) { return 'updateMask.fieldPaths=' + k; }).join('&');
+    return fetch(FIREBASE_BASE + '/' + col + '/' + id + '?' + mask + '&key=' + FIREBASE_API_KEY, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ fields: fields })
+    }).then(function(r) { return r.json(); });
+  }
+
+  function fbDelete(col, id) {
+    var url = FIREBASE_BASE + '/' + col + '/' + id + '?key=' + FIREBASE_API_KEY;
+    return fetch(url, { method: 'DELETE' }).then(function(r) {
+      if (!r.ok && r.status !== 404) {
+        return r.json().then(function(e) { console.error('fbDelete error:', e); throw e; });
+      }
+      return r;
+    });
+  }
+
+  // ===== Poll Firebase every 5s as realtime substitute =====
+  var pollTimer = null;
+  var deletedIntroIds = {};
+  var deletedInfoIds  = {};
+
+  function startListeners() {
+    loadFromFirebase();
+    pollTimer = setInterval(loadFromFirebase, 5000);
+  }
+
+  function stopListeners() {
+    if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+    intros = []; infos = [];
+  }
+
+  function loadFromFirebase() {
+    fbGet('intros').then(function(docs) {
+      docs = docs.filter(function(d) { return !deletedIntroIds[d._id]; });
+      docs.sort(function(a,b) {
+        var ta = typeof a.createdAt === 'string' ? a.createdAt : (a.createdAt||'');
+        var tb = typeof b.createdAt === 'string' ? b.createdAt : (b.createdAt||'');
+        return tb > ta ? 1 : -1;
+      });
+      intros = docs;
+      saveIntros();
+      updateStats();
+      renderTable();
+    }).catch(function() {
+      try { intros = JSON.parse(localStorage.getItem('grupintro_intros') || '[]'); } catch(e) { intros = []; }
+      updateStats(); renderTable();
+    });
+
+    fbGet('infos').then(function(docs) {
+      docs = docs.filter(function(d) { return !deletedInfoIds[d._id]; });
+      docs.sort(function(a,b) {
+        var ta = typeof a.createdAt === 'string' ? a.createdAt : (a.createdAt||'');
+        var tb = typeof b.createdAt === 'string' ? b.createdAt : (b.createdAt||'');
+        return tb > ta ? 1 : -1;
+      });
+      infos = docs;
+      saveInfos();
+      updateStats();
+      renderInfoAdmin();
+    }).catch(function() {
+      try { infos = JSON.parse(localStorage.getItem('grupintro_infos') || '[]'); } catch(e) { infos = []; }
+      updateStats(); renderInfoAdmin();
+    });
+  }
+
+  // ===== LOCALSTORAGE backup =====
+  function loadData() {
+    try { intros = JSON.parse(localStorage.getItem('grupintro_intros') || '[]'); } catch(e) { intros = []; }
+    try { infos  = JSON.parse(localStorage.getItem('grupintro_infos')  || '[]'); } catch(e) { infos  = []; }
+  }
+  function saveIntros() { localStorage.setItem('grupintro_intros', JSON.stringify(intros)); }
+  function saveInfos()  { localStorage.setItem('grupintro_infos',  JSON.stringify(infos));  }
+
+  // ===== STATE =====
+  const CREDENTIALS = { user: '113', pass: '113' };
+  let intros = [];
+  let infos  = [];
+  let currentInfoType = 'umum';
+  let activeId = null;
+  let pickedLabel = '';
+  let currentFilter = 'ALL';
+
+  // ===== AUTH =====
+  function doLogin() {
+    const u = document.getElementById('loginUser').value.trim();
+    const p = document.getElementById('loginPass').value.trim();
+    if (u === CREDENTIALS.user && p === CREDENTIALS.pass) {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('adminPanel').style.display = 'block';
+      loadData(); updateStats(); renderTable(); renderInfoAdmin();
+      startListeners();
+    } else {
+      const err = document.getElementById('loginErr');
+      err.style.display = 'block';
+      setTimeout(function() { err.style.display = 'none'; }, 3000);
+    }
+  }
+
+  function doLogout() {
+    stopListeners();
+    intros = []; infos = [];
+    document.getElementById('adminPanel').style.display = 'none';
+    document.getElementById('loginScreen').style.display = 'flex';
+    document.getElementById('loginUser').value = '';
+    document.getElementById('loginPass').value = '';
+  }
+
+  // ===== STATS =====
+  function updateStats() {
+    document.getElementById('statTotal').textContent   = intros.length;
+    document.getElementById('statOwner').textContent   = intros.filter(function(i) { return i.label === 'OWNER'; }).length;
+    document.getElementById('statAdmin').textContent   = intros.filter(function(i) { return i.label === 'ADMIN'; }).length;
+    document.getElementById('statMember').textContent  = intros.filter(function(i) { return i.label === 'MEMBER' || !i.label; }).length;
+    document.getElementById('statAnomali').textContent = intros.filter(function(i) { return i.label === 'ANOMALI'; }).length;
+    document.getElementById('statDev').textContent     = intros.filter(function(i) { return i.label === 'DEV'; }).length;
+    document.getElementById('statInfo').textContent    = infos.length;
+  }
+
+  // ===== FILTER & RENDER TABLE =====
+  function setFilter(f, btn) {
+    currentFilter = f;
+    document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
+    btn.classList.add('active');
+    renderTable();
+  }
+
+  function renderTable() {
+    const q = (document.getElementById('searchBox') ? document.getElementById('searchBox').value : '').toLowerCase();
+    var rows = intros.filter(function(i) {
+      var matchFilter = currentFilter === 'ALL' || (i.label || 'MEMBER') === currentFilter;
+      var matchSearch = !q || (i.nama||'').toLowerCase().includes(q) || (i.asal||'').toLowerCase().includes(q);
+      return matchFilter && matchSearch;
+    });
+    var tbody = document.getElementById('tableBody');
+    var empty = document.getElementById('emptyAdmin');
+    if (!rows.length) { tbody.innerHTML = ''; empty.style.display = 'block'; return; }
+    empty.style.display = 'none';
+    tbody.innerHTML = rows.map(function(d, idx) {
+      var lbl = d.label || 'MEMBER';
+      var lIcon = {OWNER:'👑',ADMIN:'🌸',MEMBER:'💙',ANOMALI:'🌀',DEV:'⚙️'}[lbl] || '💙';
+      var photoHTML = '';
+      if (d.visual && d.visual.type === 'link' && d.visual.value)
+        photoHTML = '<img class="photo-tiny" src="' + esc(d.visual.value) + '" onerror="this.style.display=\'none\'"/>';
+      else if (d.visual && d.visual.type === 'stiker' && d.visual.value)
+        photoHTML = '<span class="sticker-tiny">' + d.visual.value + '</span>';
+      else photoHTML = '<span class="sticker-tiny">👤</span>';
+      var commentHTML = d.adminComment
+        ? '<span class="comment-bubble">💬 ' + esc(d.adminComment) + '</span>'
+        : '<span style="color:var(--muted2);font-size:0.78rem;">—</span>';
+      return '<tr>' +
+        '<td style="color:var(--muted2);font-family:\'JetBrains Mono\',monospace;font-size:0.78rem;">' + (idx+1) + '</td>' +
+        '<td>' + photoHTML + '</td>' +
+        '<td style="font-weight:800;">' + esc(d.nama) + '</td>' +
+        '<td style="font-family:\'JetBrains Mono\',monospace;">' + esc(d.umur) + '</td>' +
+        '<td>' + esc(d.asal) + '</td>' +
+        '<td>' + esc(d.gender) + '</td>' +
+        '<td><span class="label-badge label-' + lbl + '">' + lIcon + ' ' + lbl + '</span></td>' +
+        '<td>' + commentHTML + '</td>' +
+        '<td style="color:var(--muted2);font-size:0.78rem;white-space:nowrap;">' + esc(d.ts||'') + '</td>' +
+        '<td><div class="actions-cell">' +
+          '<button class="act-btn act-label" onclick="openLabel(\'' + d._id + '\')">🏷️</button>' +
+          '<button class="act-btn act-comment" onclick="openComment(\'' + d._id + '\')">💬</button>' +
+          '<button class="act-btn act-del" onclick="openDelete(\'' + d._id + '\')">🗑️</button>' +
+        '</div></td>' +
+      '</tr>';
+    }).join('');
+  }
+
+  // ===== MODALS =====
+  function openComment(id) {
+    activeId = id;
+    var entry = intros.find(function(i) { return i._id === id; });
+    document.getElementById('modalCommentSub').textContent = 'Member: ' + (entry ? entry.nama : '');
+    document.getElementById('commentInput').value = entry ? (entry.adminComment || '') : '';
+    document.getElementById('modalComment').classList.add('show');
+    setTimeout(function() { document.getElementById('commentInput').focus(); }, 100);
+  }
+
+  function saveComment() {
+    if (!activeId) return;
+    var val = document.getElementById('commentInput').value.trim();
+    var btn = document.querySelector('#modalComment .modal-confirm');
+    btn.disabled = true;
+    // update local immediately
+    intros = intros.map(function(i) { return i._id === activeId ? Object.assign({}, i, {adminComment: val}) : i; });
+    saveIntros(); renderTable();
+    // sync to Firebase
+    fbUpdate('intros', activeId, { adminComment: val })
+      .then(function() { showToast('💬 Komentar disimpan!'); closeModal('modalComment'); })
+      .catch(function() { showToast('💬 Tersimpan lokal (offline)'); closeModal('modalComment'); })
+      .finally(function() { btn.disabled = false; });
+  }
+
+  function openLabel(id) {
+    activeId = id;
+    var entry = intros.find(function(i) { return i._id === id; });
+    document.getElementById('modalLabelSub').textContent = 'Member: ' + (entry ? entry.nama : '');
+    pickedLabel = entry ? (entry.label || 'MEMBER') : 'MEMBER';
+    document.querySelectorAll('.label-opt').forEach(function(el) {
+      el.classList.toggle('active', el.dataset.lbl === pickedLabel);
+    });
+    document.getElementById('modalLabel').classList.add('show');
+  }
+
+  function selectLabel(el) {
+    pickedLabel = el.dataset.lbl;
+    document.querySelectorAll('.label-opt').forEach(function(e) { e.classList.remove('active'); });
+    el.classList.add('active');
+  }
+
+  function saveLabel() {
+    if (!activeId) return;
+    var btn = document.querySelector('#modalLabel .modal-confirm');
+    btn.disabled = true;
+    intros = intros.map(function(i) { return i._id === activeId ? Object.assign({}, i, {label: pickedLabel}) : i; });
+    saveIntros(); updateStats(); renderTable();
+    fbUpdate('intros', activeId, { label: pickedLabel })
+      .then(function() { showToast('🏷️ Label diperbarui!'); closeModal('modalLabel'); })
+      .catch(function() { showToast('🏷️ Tersimpan lokal (offline)'); closeModal('modalLabel'); })
+      .finally(function() { btn.disabled = false; });
+  }
+
+  function openDelete(id) {
+    activeId = id;
+    var entry = intros.find(function(i) { return i._id === id; });
+    document.getElementById('modalDeleteSub').textContent = 'Yakin hapus intro dari "' + (entry ? entry.nama : '') + '"? Ga bisa balik lagi ya!';
+    document.getElementById('modalDelete').classList.add('show');
+  }
+
+  function confirmDelete() {
+    if (!activeId) return;
+    var btn = document.querySelector('#modalDelete .modal-confirm');
+    btn.disabled = true;
+    btn.textContent = '⏳ Menghapus...';
+    var deletedId = activeId;
+    deletedIntroIds[deletedId] = true;
+    intros = intros.filter(function(i) { return i._id !== deletedId; });
+    saveIntros(); updateStats(); renderTable();
+    fbDelete('intros', deletedId)
+      .then(function() { showToast('🗑️ Intro dihapus dari server!'); })
+      .catch(function(e) { console.error('Delete intro failed:', e); showToast('🗑️ Dihapus lokal, server gagal'); })
+      .finally(function() { btn.disabled = false; btn.textContent = '🗑️ Hapus'; });
+  }
+
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('show');
+    activeId = null;
+  }
+
+  // ===== INFO MANAGEMENT =====
+  function pickInfoType(btn) {
+    currentInfoType = btn.dataset.itype;
+    document.querySelectorAll('.itype-btn').forEach(function(b) { b.className = 'itype-btn'; });
+    btn.classList.add('active-' + currentInfoType);
+  }
+
+  function addInfo() {
+    var title    = document.getElementById('infoTitle').value.trim();
+    var content  = document.getElementById('infoContent').value.trim();
+    var author   = document.getElementById('infoAuthor').value.trim() || 'Admin';
+    var photoUrl = document.getElementById('infoPhoto').value.trim();
+    if (!title || !content) { showToast('⚠️ Judul dan isi wajib diisi!'); return; }
+    var addBtn = document.querySelector('.add-info-btn');
+    addBtn.disabled = true;
+    addBtn.textContent = '⏳ Mengirim...';
+    var newInfo = {
+      type: currentInfoType, title: title, content: content, author: author, photoUrl: photoUrl,
+      date: new Date().toLocaleDateString('id-ID'),
+      createdAt: new Date().toISOString()
+    };
+    // post ke Firebase dulu, dapatkan ID asli
+    fbAdd('infos', newInfo).then(function(resp) {
+      // pakai ID dari Firebase biar delete bisa match
+      var firebaseId = resp.name ? resp.name.split('/').pop() : Date.now().toString();
+      newInfo._id = firebaseId;
+      infos.unshift(newInfo);
+      saveInfos(); renderInfoAdmin(); updateStats();
+      document.getElementById('infoTitle').value   = '';
+      document.getElementById('infoContent').value = '';
+      document.getElementById('infoPhoto').value   = '';
+      showToast('📢 Info berhasil diposting!');
+    }).catch(function() {
+      // offline fallback
+      newInfo._id = Date.now().toString();
+      infos.unshift(newInfo);
+      saveInfos(); renderInfoAdmin(); updateStats();
+      document.getElementById('infoTitle').value   = '';
+      document.getElementById('infoContent').value = '';
+      document.getElementById('infoPhoto').value   = '';
+      showToast('📢 Tersimpan lokal (offline)');
+    }).finally(function() {
+      addBtn.disabled = false;
+      addBtn.textContent = '📢 Posting Info';
+    });
+  }
+
+  function deleteInfo(id) {
+    if (!confirm('Hapus info ini?')) return;
+    deletedInfoIds[id] = true;
+    infos = infos.filter(function(i) { return i._id !== id; });
+    saveInfos(); renderInfoAdmin(); updateStats();
+    fbDelete('infos', id)
+      .then(function() { showToast('🗑️ Info dihapus dari server!'); })
+      .catch(function(e) { console.error('Delete info failed:', e); showToast('🗑️ Dihapus lokal, server gagal'); });
+  }
+
+  function renderInfoAdmin() {
+    var el = document.getElementById('infoAdminList');
+    if (!infos.length) { el.innerHTML = '<div class="info-empty-admin">Belum ada info yang diposting.</div>'; return; }
+    var badgeMap = {
+      umum:   '<span class="iac-badge iac-badge-umum">📌 Umum</span>',
+      urgent: '<span class="iac-badge iac-badge-urgent">🚨 Urgent</span>',
+      info:   '<span class="iac-badge iac-badge-info">ℹ️ Info</span>',
+      event:  '<span class="iac-badge iac-badge-event">🎉 Event</span>',
+      dev:    '<span class="iac-badge iac-badge-dev">⚙️ Dev</span>'
+    };
+    el.innerHTML = '<div class="info-admin-list">' + infos.map(function(item) {
+      return '<div class="info-admin-card">' +
+        '<div class="iac-accent iac-' + item.type + '"></div>' +
+        '<div class="iac-body">' +
+          '<div class="iac-top"><div class="iac-title">' + esc(item.title) + '</div>' +
+          '<button class="iac-del" onclick="deleteInfo(\'' + item._id + '\')">🗑️ Hapus</button></div>' +
+          (item.photoUrl ? '<img src="' + esc(item.photoUrl) + '" style="width:100%;max-height:140px;object-fit:cover;border-radius:10px;margin-bottom:10px;border:1px solid rgba(240,98,146,0.2);" onerror="this.style.display=\'none\'"/>' : '') +
+          '<div class="iac-content">' + esc(item.content||'').replace(/\n/g,'<br>') + '</div>' +
+          '<div class="iac-meta">' + (badgeMap[item.type]||badgeMap.umum) + '<span class="iac-date">📅 ' + esc(item.date||'') + ' · ✍️ ' + esc(item.author||'Admin') + '</span></div>' +
+        '</div></div>';
+    }).join('') + '</div>';
+  }
+
+  // ===== TOAST =====
+  function showToast(msg) {
+    var t = document.getElementById('toast');
+    t.textContent = msg;
+    t.style.display = 'block';
+    clearTimeout(t._timer);
+    t._timer = setTimeout(function() { t.style.display = 'none'; }, 2500);
+  }
+
+  // ===== ESCAPE =====
+  function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+  // ===== BIND EVENTS =====
+  document.querySelector('.login-btn').addEventListener('click', doLogin);
+  document.getElementById('loginPass').addEventListener('keydown', function(e) { if (e.key === 'Enter') doLogin(); });
+  document.getElementById('loginUser').addEventListener('keydown', function(e) { if (e.key === 'Enter') doLogin(); });
+  document.querySelector('.logout-btn').addEventListener('click', doLogout);
+  document.getElementById('searchBox').addEventListener('input', renderTable);
+  var filterMap = {'Semua':'ALL','Owner':'OWNER','Admin':'ADMIN','Member':'MEMBER','Anomali':'ANOMALI','Dev':'DEV'};
+  document.querySelectorAll('.filter-btn').forEach(function(btn) {
+    var key = Object.keys(filterMap).find(function(k) { return btn.textContent.includes(k); });
+    if (key) btn.addEventListener('click', function() { setFilter(filterMap[key], btn); });
+  });
+  document.querySelectorAll('.itype-btn').forEach(function(btn) { btn.addEventListener('click', function() { pickInfoType(btn); }); });
+  document.querySelector('.add-info-btn').addEventListener('click', addInfo);
+  document.querySelector('#modalComment .modal-cancel').addEventListener('click', function() { closeModal('modalComment'); });
+  document.querySelector('#modalComment .modal-confirm').addEventListener('click', saveComment);
+  document.querySelector('#modalLabel .modal-cancel').addEventListener('click', function() { closeModal('modalLabel'); });
+  document.querySelector('#modalLabel .modal-confirm').addEventListener('click', saveLabel);
+  document.querySelectorAll('.label-opt').forEach(function(el) { el.addEventListener('click', function() { selectLabel(el); }); });
+  document.querySelector('#modalDelete .modal-cancel').addEventListener('click', function() { closeModal('modalDelete'); });
+  document.querySelector('#modalDelete .modal-confirm').addEventListener('click', confirmDelete);
+  document.querySelectorAll('.modal-overlay').forEach(function(m) { m.addEventListener('click', function(ev) { if (ev.target === m) m.classList.remove('show'); }); });
+</script>
+</body>
+</html>
