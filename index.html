@@ -1,1102 +1,344 @@
-<!DOCTYPE html>
-<html lang="id">
-<head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Admin Panel 🌸 GrupIntro</title>
-  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet"/>
-  <style>
-    :root {
-      --bg: #0d0a0f;
-      --surface: rgba(30,18,35,0.95);
-      --card: rgba(40,24,48,0.85);
-      --border: rgba(240,98,146,0.18);
-      --border2: rgba(240,98,146,0.32);
-      --accent: #f06292;
-      --accent2: #ec407a;
-      --accent3: #ff80ab;
-      --gold: #ffd700;
-      --silver: #c0c0c0;
-      --teal: #4dd0e1;
-      --purple: #ce93d8;
-      --text: #f8e8f0;
-      --muted: #b08090;
-      --muted2: #7a5060;
-      --glow: rgba(240,98,146,0.25);
-    }
-    * { margin:0; padding:0; box-sizing:border-box; }
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Nunito', sans-serif;
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
-    body::before {
-      content:'';position:fixed;inset:0;
-      background-image:
-        radial-gradient(rgba(240,98,146,0.04) 1px, transparent 1px);
-      background-size: 32px 32px;
-      pointer-events:none;z-index:0;
-    }
-    .bg-glow {
-      position:fixed;pointer-events:none;z-index:0;border-radius:50%;filter:blur(100px);
-    }
-    .bg-glow-1 { width:600px;height:600px;background:rgba(240,98,146,0.08);top:-200px;left:-200px; }
-    .bg-glow-2 { width:400px;height:400px;background:rgba(206,147,216,0.06);bottom:-100px;right:-100px; }
-    .bg-glow-3 { width:300px;height:300px;background:rgba(77,208,225,0.04);top:40%;left:40%; }
-
-    /* ===== LOGIN ===== */
-    #loginScreen {
-      position:fixed;inset:0;z-index:999;
-      display:flex;align-items:center;justify-content:center;
-      background: radial-gradient(ellipse at center, rgba(40,18,35,0.98) 0%, rgba(13,10,15,0.99) 100%);
-      backdrop-filter:blur(20px);
-    }
-    .login-box {
-      width:100%;max-width:400px;padding:48px 40px;
-      background:rgba(30,18,35,0.9);
-      border:1px solid var(--border2);
-      border-radius:28px;
-      box-shadow:0 0 60px rgba(240,98,146,0.1),0 20px 60px rgba(0,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.05);
-      animation: loginIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both;
-      position:relative;z-index:1;
-    }
-    @keyframes loginIn { from{opacity:0;transform:translateY(30px) scale(0.95);} to{opacity:1;transform:none;} }
-    .login-logo {
-      text-align:center;margin-bottom:32px;
-    }
-    .login-logo .badge {
-      display:inline-flex;align-items:center;gap:8px;
-      padding:6px 16px;border-radius:100px;
-      background:rgba(240,98,146,0.1);border:1px solid var(--border2);
-      font-size:0.7rem;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;
-      color:var(--accent);margin-bottom:14px;
-    }
-    .login-logo h1 {
-      font-size:1.8rem;font-weight:900;color:var(--text);
-      background:linear-gradient(135deg,#fff 0%,#f06292 60%,#ff80ab 100%);
-      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-    }
-    .login-logo p { font-size:0.85rem;color:var(--muted);margin-top:6px;font-weight:600; }
-    .login-field { margin-bottom:16px; }
-    .login-field label {
-      display:block;font-size:0.75rem;font-weight:800;letter-spacing:0.08em;
-      text-transform:uppercase;color:var(--muted);margin-bottom:7px;
-    }
-    .login-field input {
-      width:100%;padding:12px 16px;border-radius:12px;
-      background:rgba(255,255,255,0.04);
-      border:1.5px solid rgba(240,98,146,0.2);
-      color:var(--text);font-family:'JetBrains Mono',monospace;
-      font-size:1rem;font-weight:600;outline:none;transition:all 0.2s;
-      letter-spacing:0.1em;
-    }
-    .login-field input:focus {
-      border-color:var(--accent);
-      background:rgba(240,98,146,0.05);
-      box-shadow:0 0 0 3px rgba(240,98,146,0.1);
-    }
-    .login-btn {
-      width:100%;padding:14px;border-radius:14px;border:none;
-      background:linear-gradient(135deg,#f06292,#ec407a,#f48fb1);
-      color:#fff;font-family:'Nunito',sans-serif;font-size:1rem;font-weight:900;
-      cursor:pointer;transition:all 0.22s;letter-spacing:0.05em;margin-top:8px;
-      box-shadow:0 4px 24px rgba(236,64,122,0.35);
-    }
-    .login-btn:hover { transform:translateY(-2px);box-shadow:0 8px 32px rgba(236,64,122,0.45); }
-    .login-btn:active { transform:translateY(0); }
-    .login-err {
-      display:none;margin-top:12px;padding:10px 14px;border-radius:10px;
-      background:rgba(255,80,80,0.1);border:1px solid rgba(255,80,80,0.25);
-      color:#ff8a80;font-size:0.83rem;font-weight:700;text-align:center;
-    }
-
-    /* ===== MAIN PANEL ===== */
-    #adminPanel { display:none;position:relative;z-index:1;min-height:100vh; }
-
-    /* TOP BAR */
-    .topbar {
-      position:sticky;top:0;z-index:100;
-      display:flex;align-items:center;justify-content:space-between;
-      padding:0 28px;height:62px;
-      background:rgba(13,10,15,0.85);
-      backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);
-      border-bottom:1px solid var(--border);
-      box-shadow:0 2px 24px rgba(0,0,0,0.4);
-    }
-    .topbar-left { display:flex;align-items:center;gap:14px; }
-    .topbar-logo {
-      font-weight:900;font-size:1.1rem;
-      background:linear-gradient(135deg,#fff,#f06292,#ff80ab);
-      -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-    }
-    .topbar-sep { width:1px;height:24px;background:var(--border); }
-    .topbar-sub { font-size:0.75rem;font-weight:700;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase; }
-    .topbar-right { display:flex;align-items:center;gap:10px; }
-    .logout-btn {
-      padding:7px 16px;border-radius:100px;border:1px solid var(--border2);
-      background:transparent;color:var(--accent);
-      font-family:'Nunito',sans-serif;font-size:0.8rem;font-weight:800;cursor:pointer;
-      transition:all 0.2s;letter-spacing:0.04em;
-    }
-    .logout-btn:hover { background:rgba(240,98,146,0.1);border-color:var(--accent); }
-
-    /* STATS */
-    .stats-row {
-      display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
-      gap:14px;padding:24px 28px 0;
-    }
-    .stat-card {
-      background:var(--card);backdrop-filter:blur(16px);
-      border:1px solid var(--border);border-radius:18px;
-      padding:18px 20px;position:relative;overflow:hidden;
-      transition:all 0.22s;
-    }
-    .stat-card::before {
-      content:'';position:absolute;top:0;left:0;right:0;height:2px;
-      background:linear-gradient(90deg,var(--accent),var(--accent3));
-    }
-    .stat-card:hover { border-color:var(--border2);box-shadow:0 4px 24px rgba(240,98,146,0.12); }
-    .stat-num {
-      font-family:'JetBrains Mono',monospace;font-size:2rem;font-weight:700;
-      color:var(--accent);line-height:1;margin-bottom:4px;
-    }
-    .stat-label { font-size:0.75rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.08em; }
-
-    /* CONTENT */
-    .content { padding:24px 28px 80px; }
-    .section-title {
-      font-size:0.7rem;font-weight:800;letter-spacing:0.12em;text-transform:uppercase;
-      color:var(--accent);margin-bottom:16px;display:flex;align-items:center;gap:8px;
-    }
-    .section-title::after { content:'';flex:1;height:1px;background:linear-gradient(to right,var(--border),transparent); }
-
-    /* FILTERS */
-    .filters {
-      display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;align-items:center;
-    }
-    .filter-btn {
-      padding:6px 14px;border-radius:100px;border:1px solid var(--border);
-      background:transparent;color:var(--muted);
-      font-family:'Nunito',sans-serif;font-size:0.78rem;font-weight:700;
-      cursor:pointer;transition:all 0.18s;
-    }
-    .filter-btn:hover { border-color:var(--border2);color:var(--accent3); }
-    .filter-btn.active { background:rgba(240,98,146,0.12);border-color:var(--accent);color:var(--accent); }
-    .search-box {
-      margin-left:auto;padding:6px 14px;border-radius:100px;
-      border:1px solid var(--border);background:rgba(255,255,255,0.03);
-      color:var(--text);font-family:'Nunito',sans-serif;font-size:0.82rem;font-weight:600;
-      outline:none;transition:all 0.2s;min-width:180px;
-    }
-    .search-box:focus { border-color:var(--accent);background:rgba(240,98,146,0.05); }
-    .search-box::placeholder { color:var(--muted2); }
-
-    /* TABLE */
-    .table-wrap {
-      background:var(--card);border:1px solid var(--border);border-radius:20px;
-      overflow:hidden;overflow-x:auto;
-    }
-    table { width:100%;border-collapse:collapse;min-width:700px; }
-    thead tr {
-      background:rgba(240,98,146,0.06);
-      border-bottom:1px solid var(--border);
-    }
-    thead th {
-      padding:13px 16px;font-size:0.7rem;font-weight:800;letter-spacing:0.1em;
-      text-transform:uppercase;color:var(--muted);text-align:left;white-space:nowrap;
-    }
-    tbody tr {
-      border-bottom:1px solid rgba(240,98,146,0.07);
-      transition:background 0.15s;
-    }
-    tbody tr:last-child { border-bottom:none; }
-    tbody tr:hover { background:rgba(240,98,146,0.04); }
-    td { padding:13px 16px;font-size:0.87rem;font-weight:600;color:var(--text);vertical-align:middle; }
-
-    /* LABELS */
-    .label-badge {
-      display:inline-flex;align-items:center;gap:4px;
-      padding:3px 10px;border-radius:100px;
-      font-size:0.68rem;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;
-      white-space:nowrap;
-    }
-    .label-OWNER {
-      background:linear-gradient(135deg,rgba(255,215,0,0.18),rgba(255,180,0,0.12));
-      border:1px solid rgba(255,215,0,0.4);color:#ffd700;
-      box-shadow:0 0 10px rgba(255,215,0,0.12);
-    }
-    .label-ADMIN {
-      background:linear-gradient(135deg,rgba(240,98,146,0.22),rgba(255,128,171,0.15));
-      border:1px solid rgba(240,98,146,0.45);color:#f06292;
-      box-shadow:0 0 10px rgba(240,98,146,0.15);
-    }
-    .label-MEMBER {
-      background:rgba(77,208,225,0.1);border:1px solid rgba(77,208,225,0.3);color:#4dd0e1;
-    }
-    .label-ANOMALI {
-      background:rgba(206,147,216,0.12);border:1px solid rgba(206,147,216,0.35);color:#ce93d8;
-    }
-    .label-DEV { background:rgba(100,220,100,0.12);border:1px solid rgba(100,220,100,0.35);color:#81c784; }
-
-    /* ACTIONS */
-    .act-btn {
-      padding:5px 12px;border-radius:8px;border:none;font-family:'Nunito',sans-serif;
-      font-size:0.75rem;font-weight:800;cursor:pointer;transition:all 0.18s;
-      display:inline-flex;align-items:center;gap:4px;
-    }
-    .act-del { background:rgba(255,80,80,0.1);color:#ff8a80;border:1px solid rgba(255,80,80,0.2); }
-    .act-del:hover { background:rgba(255,80,80,0.2);border-color:rgba(255,80,80,0.4); }
-    .act-comment { background:rgba(240,98,146,0.1);color:var(--accent3);border:1px solid var(--border); }
-    .act-comment:hover { background:rgba(240,98,146,0.18);border-color:var(--border2); }
-    .act-label { background:rgba(255,215,0,0.08);color:#ffd700;border:1px solid rgba(255,215,0,0.2); }
-    .act-label:hover { background:rgba(255,215,0,0.15);border-color:rgba(255,215,0,0.35); }
-    .actions-cell { display:flex;gap:6px;flex-wrap:wrap;align-items:center; }
-
-    /* COMMENTS in table */
-    .comment-bubble {
-      display:inline-flex;align-items:center;gap:5px;
-      background:rgba(240,98,146,0.08);border:1px solid var(--border);
-      border-radius:8px;padding:4px 10px;font-size:0.75rem;color:var(--muted);
-      font-weight:600;max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-    }
-
-    /* MODAL */
-    .modal-overlay {
-      display:none;position:fixed;inset:0;z-index:200;
-      background:rgba(13,10,15,0.85);backdrop-filter:blur(8px);
-      align-items:center;justify-content:center;padding:20px;
-    }
-    .modal-overlay.show { display:flex; }
-    .modal-box {
-      background:rgba(30,18,35,0.98);border:1px solid var(--border2);
-      border-radius:24px;padding:32px;width:100%;max-width:480px;
-      box-shadow:0 20px 80px rgba(0,0,0,0.6),0 0 40px rgba(240,98,146,0.1);
-      animation:modalIn 0.28s cubic-bezier(0.34,1.56,0.64,1) both;
-    }
-    @keyframes modalIn { from{opacity:0;transform:scale(0.92) translateY(20px);} to{opacity:1;transform:none;} }
-    .modal-title {
-      font-size:1rem;font-weight:900;color:var(--text);margin-bottom:4px;
-    }
-    .modal-sub { font-size:0.8rem;color:var(--muted);margin-bottom:22px;font-weight:600; }
-    .modal-field { margin-bottom:14px; }
-    .modal-field label {
-      display:block;font-size:0.72rem;font-weight:800;letter-spacing:0.08em;
-      text-transform:uppercase;color:var(--muted);margin-bottom:7px;
-    }
-    .modal-field textarea, .modal-field select, .modal-field input {
-      width:100%;padding:10px 14px;border-radius:12px;
-      background:rgba(255,255,255,0.04);border:1.5px solid rgba(240,98,146,0.2);
-      color:var(--text);font-family:'Nunito',sans-serif;font-size:0.9rem;font-weight:600;
-      outline:none;transition:all 0.2s;resize:vertical;
-    }
-    .modal-field textarea:focus, .modal-field select:focus, .modal-field input:focus {
-      border-color:var(--accent);background:rgba(240,98,146,0.05);
-      box-shadow:0 0 0 3px rgba(240,98,146,0.08);
-    }
-    .modal-field select option { background:#1a0e22;color:var(--text); }
-    .modal-actions { display:flex;gap:10px;margin-top:20px; }
-    .modal-confirm {
-      flex:1;padding:11px;border-radius:12px;border:none;
-      background:linear-gradient(135deg,#f06292,#ec407a);
-      color:#fff;font-family:'Nunito',sans-serif;font-size:0.9rem;font-weight:900;
-      cursor:pointer;transition:all 0.2s;
-    }
-    .modal-confirm:hover { transform:translateY(-1px);box-shadow:0 6px 20px rgba(236,64,122,0.35); }
-    .modal-cancel {
-      flex:1;padding:11px;border-radius:12px;
-      border:1px solid var(--border2);background:transparent;
-      color:var(--muted);font-family:'Nunito',sans-serif;font-size:0.9rem;font-weight:800;
-      cursor:pointer;transition:all 0.2s;
-    }
-    .modal-cancel:hover { background:rgba(255,255,255,0.04);color:var(--text); }
-
-    /* LABEL PICKER in modal */
-    .label-picker { display:flex;gap:8px;flex-wrap:wrap; }
-    .label-opt {
-      padding:7px 14px;border-radius:10px;border:1.5px solid transparent;
-      font-family:'Nunito',sans-serif;font-size:0.78rem;font-weight:800;
-      cursor:pointer;transition:all 0.2s;letter-spacing:0.05em;text-transform:uppercase;
-    }
-    .label-opt[data-lbl="OWNER"] { color:#ffd700;border-color:rgba(255,215,0,0.25);background:rgba(255,215,0,0.06); }
-    .label-opt[data-lbl="ADMIN"] { color:#f06292;border-color:rgba(240,98,146,0.25);background:rgba(240,98,146,0.06); }
-    .label-opt[data-lbl="MEMBER"] { color:#4dd0e1;border-color:rgba(77,208,225,0.25);background:rgba(77,208,225,0.06); }
-    .label-opt[data-lbl="ANOMALI"] { color:#ce93d8;border-color:rgba(206,147,216,0.25);background:rgba(206,147,216,0.06); }
-    .label-opt[data-lbl="DEV"] { color:#81c784;border-color:rgba(100,220,100,0.25);background:rgba(100,220,100,0.06); }
-    .label-opt.active[data-lbl="OWNER"] { background:rgba(255,215,0,0.18);border-color:rgba(255,215,0,0.5);box-shadow:0 0 14px rgba(255,215,0,0.15); }
-    .label-opt.active[data-lbl="ADMIN"] { background:rgba(240,98,146,0.2);border-color:rgba(240,98,146,0.5);box-shadow:0 0 14px rgba(240,98,146,0.18); }
-    .label-opt.active[data-lbl="MEMBER"] { background:rgba(77,208,225,0.16);border-color:rgba(77,208,225,0.5);box-shadow:0 0 14px rgba(77,208,225,0.12); }
-    .label-opt.active[data-lbl="ANOMALI"] { background:rgba(206,147,216,0.18);border-color:rgba(206,147,216,0.5);box-shadow:0 0 14px rgba(206,147,216,0.12); }
-    .label-opt.active[data-lbl="DEV"] { background:rgba(100,220,100,0.18);border-color:rgba(100,220,100,0.5);box-shadow:0 0 14px rgba(100,220,100,0.12); }
-
-    /* TOAST */
-    .toast {
-      position:fixed;bottom:24px;right:24px;z-index:999;
-      padding:12px 20px;border-radius:14px;
-      background:rgba(30,18,35,0.95);border:1px solid var(--border2);
-      color:var(--text);font-size:0.85rem;font-weight:700;
-      box-shadow:0 8px 32px rgba(0,0,0,0.4);
-      animation:toastIn 0.3s ease both;
-      display:none;
-    }
-    @keyframes toastIn { from{opacity:0;transform:translateY(16px);} to{opacity:1;transform:none;} }
-
-    /* EMPTY */
-    .empty-admin { text-align:center;padding:60px 20px;color:var(--muted2); }
-    .empty-admin .e-icon { font-size:3rem;margin-bottom:12px; }
-    .empty-admin p { font-size:0.9rem;font-weight:600; }
-
-    /* PHOTO PREVIEW */
-    .photo-tiny {
-      width:36px;height:36px;border-radius:8px;object-fit:cover;
-      border:1px solid var(--border);vertical-align:middle;
-    }
-    .sticker-tiny { font-size:1.6rem;line-height:1; }
-
-
-    /* INFO SECTION */
-    .info-section-wrap { margin-top:28px; }
-    .info-form-card {
-      background:var(--card);border:1px solid var(--border);border-radius:20px;
-      padding:24px;margin-bottom:20px;
-    }
-    .info-form-grid { display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px; }
-    .info-form-full { grid-column:1/-1; }
-    .info-field { display:flex;flex-direction:column;gap:6px; }
-    .info-field label {
-      font-size:0.7rem;font-weight:800;letter-spacing:0.09em;text-transform:uppercase;color:var(--muted);
-    }
-    .info-field input, .info-field textarea, .info-field select {
-      padding:10px 14px;border-radius:12px;border:1.5px solid rgba(240,98,146,0.18);
-      background:rgba(255,255,255,0.03);color:var(--text);
-      font-family:'Nunito',sans-serif;font-size:0.9rem;font-weight:600;outline:none;transition:all 0.2s;resize:vertical;
-    }
-    .info-field input:focus, .info-field textarea:focus, .info-field select:focus {
-      border-color:var(--accent);background:rgba(240,98,146,0.05);box-shadow:0 0 0 3px rgba(240,98,146,0.08);
-    }
-    .info-field select option { background:#1a0e22;color:var(--text); }
-    .info-type-picker { display:flex;gap:8px;flex-wrap:wrap; }
-    .itype-btn {
-      flex:1;min-width:80px;padding:8px 10px;border-radius:12px;border:1.5px solid rgba(240,98,146,0.2);
-      background:rgba(255,255,255,0.03);font-family:'Nunito',sans-serif;font-size:0.78rem;font-weight:800;
-      cursor:pointer;transition:all 0.2s;text-align:center;color:var(--muted);
-    }
-    .itype-btn:hover { border-color:var(--border2);color:var(--accent3); }
-    .itype-btn.active-umum { background:rgba(240,98,146,0.15);border-color:rgba(240,98,146,0.5);color:#f06292; }
-    .itype-btn.active-urgent { background:rgba(255,82,82,0.15);border-color:rgba(255,82,82,0.5);color:#ff5252; }
-    .itype-btn.active-info { background:rgba(66,165,245,0.15);border-color:rgba(66,165,245,0.5);color:#42a5f5; }
-    .itype-btn.active-event { background:rgba(171,71,188,0.15);border-color:rgba(171,71,188,0.5);color:#ab47bc; }
-    .itype-btn.active-dev   { background:rgba(100,220,100,0.15);border-color:rgba(100,220,100,0.5);color:#81c784; }
-    .add-info-btn {
-      padding:12px 24px;border-radius:12px;border:none;
-      background:linear-gradient(135deg,#f06292,#ec407a);color:#fff;
-      font-family:'Nunito',sans-serif;font-size:0.9rem;font-weight:900;cursor:pointer;transition:all 0.2s;
-      box-shadow:0 4px 16px rgba(240,98,146,0.3);
-    }
-    .add-info-btn:hover { transform:translateY(-1px);box-shadow:0 6px 20px rgba(240,98,146,0.4); }
-
-    /* INFO LIST ADMIN */
-    .info-admin-list { display:flex;flex-direction:column;gap:12px; }
-    .info-admin-card {
-      background:var(--card);border:1px solid var(--border);border-radius:18px;
-      overflow:hidden;transition:all 0.2s;
-    }
-    .info-admin-card:hover { border-color:var(--border2); }
-    .iac-accent { height:3px; }
-    .iac-umum { background:linear-gradient(90deg,#f06292,#ec407a); }
-    .iac-urgent { background:linear-gradient(90deg,#ff5252,#f44336); }
-    .iac-info { background:linear-gradient(90deg,#42a5f5,#1e88e5); }
-    .iac-event { background:linear-gradient(90deg,#ab47bc,#8e24aa); }
-    .iac-dev   { background:linear-gradient(90deg,#66bb6a,#43a047); }
-    .iac-body { padding:16px 18px; }
-    .iac-top { display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:8px; }
-    .iac-title { font-size:0.95rem;font-weight:900;color:var(--text);flex:1; }
-    .iac-del { padding:4px 12px;border-radius:8px;border:1px solid rgba(255,80,80,0.25);
-      background:rgba(255,80,80,0.08);color:#ff8a80;font-family:'Nunito',sans-serif;
-      font-size:0.75rem;font-weight:800;cursor:pointer;transition:all 0.18s;white-space:nowrap; }
-    .iac-del:hover { background:rgba(255,80,80,0.2);border-color:rgba(255,80,80,0.45); }
-    .iac-content { font-size:0.83rem;color:var(--muted);line-height:1.6;font-weight:500;margin-bottom:10px; }
-    .iac-meta { display:flex;gap:8px;align-items:center;flex-wrap:wrap; }
-    .iac-badge {
-      padding:2px 9px;border-radius:100px;font-size:0.65rem;font-weight:800;letter-spacing:0.07em;text-transform:uppercase;
-    }
-    .iac-badge-umum { background:rgba(240,98,146,0.1);border:1px solid rgba(240,98,146,0.3);color:#f06292; }
-    .iac-badge-urgent { background:rgba(255,82,82,0.1);border:1px solid rgba(255,82,82,0.3);color:#ff5252; }
-    .iac-badge-info { background:rgba(66,165,245,0.1);border:1px solid rgba(66,165,245,0.3);color:#42a5f5; }
-    .iac-badge-event { background:rgba(171,71,188,0.1);border:1px solid rgba(171,71,188,0.3);color:#ab47bc; }
-    .iac-badge-dev   { background:rgba(100,220,100,0.1);border:1px solid rgba(100,220,100,0.3);color:#81c784; }
-    .iac-date { font-size:0.72rem;color:var(--muted2);font-weight:700; }
-    .info-empty-admin { text-align:center;padding:40px;color:var(--muted2);font-weight:700;font-size:0.88rem; }
-
-    @media(max-width:600px) {
-      .info-form-grid { grid-template-columns:1fr; }
-    }
-    /* RESPONSIVE */
-    @media(max-width:600px) {
-      .topbar { padding:0 14px; }
-      .topbar-sub { display:none; }
-      .stats-row { padding:16px 14px 0;gap:10px; }
-      .content { padding:16px 14px 60px; }
-      thead th, td { padding:10px 10px; }
-      .search-box { min-width:120px;width:100%; }
-      .filters { gap:6px; }
-      .modal-box { padding:22px 18px; }
-    }
-  </style>
+<!DOCTYPE html><html lang="id"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Soundify - R_hmt ofc.</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#121212">
+    
+    <link rel="icon" type="image/png" href="Gambar4.png">
+    <link rel="shortcut icon" href="Gambar4.png">
+    <link rel="apple-touch-icon" href="Gambar4.png">
+    
+    <link rel="stylesheet" href="style.css">
+    <script src="https://www.youtube.com/iframe_api"></script>
 </head>
 <body>
 
-<div class="bg-glow bg-glow-1"></div>
-<div class="bg-glow bg-glow-2"></div>
-<div class="bg-glow bg-glow-3"></div>
-
-<!-- LOGIN -->
-<div id="loginScreen">
-  <div class="login-box">
-    <div class="login-logo">
-      <div class="badge">🔐 Restricted Access</div>
-      <h1>Admin Panel</h1>
-      <p>GrupIntro 🌸 — Hanya untuk admin ya!</p>
-    </div>
-    <div class="login-field">
-      <label>Username</label>
-      <input type="text" id="loginUser" placeholder="Username..." autocomplete="off"/>
-    </div>
-    <div class="login-field">
-      <label>Password</label>
-      <input type="password" id="loginPass" placeholder="••••••" autocomplete="off"
-        />
-    </div>
-    <button class="login-btn" >🌸 Masuk Panel</button>
-    <div class="login-err" id="loginErr">❌ Username atau password salah!</div>
-  </div>
-</div>
-
-<!-- ADMIN PANEL -->
-<div id="adminPanel">
-  <!-- TOPBAR -->
-  <div class="topbar">
-    <div class="topbar-left">
-      <div class="topbar-logo">🌸 GrupIntro</div>
-      <div class="topbar-sep"></div>
-      <div class="topbar-sub">Admin Panel</div>
-    </div>
-    <div class="topbar-right">
-      <span style="font-size:0.78rem;color:var(--muted);font-weight:700;">👤 Admin</span>
-      <button class="logout-btn" >Logout</button>
-    </div>
-  </div>
-
-  <!-- STATS -->
-  <div class="stats-row" id="statsRow">
-    <div class="stat-card">
-      <div class="stat-num" id="statTotal">0</div>
-      <div class="stat-label">Total Member</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-num" id="statOwner" style="color:#ffd700;">0</div>
-      <div class="stat-label">Owner</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-num" id="statAdmin">0</div>
-      <div class="stat-label">Admin</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-num" id="statMember" style="color:#4dd0e1;">0</div>
-      <div class="stat-label">Member</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-num" id="statAnomali" style="color:#ce93d8;">0</div>
-      <div class="stat-label">Anomali</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-num" id="statDev" style="color:#81c784;">0</div>
-      <div class="stat-label">Dev</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-num" id="statInfo" style="color:#ff80ab;">0</div>
-      <div class="stat-label">Total Info</div>
-    </div>
-  </div>
-
-  <!-- CONTENT -->
-  <div class="content">
-    <div class="section-title">📋 Semua Intro Member</div>
-
-    <div class="filters">
-      <button class="filter-btn active" >Semua</button>
-      <button class="filter-btn" >👑 Owner</button>
-      <button class="filter-btn" >🌸 Admin</button>
-      <button class="filter-btn" >💙 Member</button>
-      <button class="filter-btn" >🌀 Anomali</button>
-      <input class="search-box" placeholder="🔍 Cari nama..." oninput="renderTable()" id="searchBox"/>
-    </div>
-
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Foto</th>
-            <th>Nama</th>
-            <th>Umur</th>
-            <th>Asal</th>
-            <th>Gender</th>
-            <th>Label</th>
-            <th>Komentar Admin</th>
-            <th>Tanggal</th>
-            <th>Aksi</th>
-          </tr>
-        </thead>
-        <tbody id="tableBody"></tbody>
-      </table>
-      <div class="empty-admin" id="emptyAdmin" style="display:none;">
-        <div class="e-icon">🌸</div>
-        <p>Belum ada intro yang masuk.</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- INFO MANAGEMENT -->
-  <div class="info-section-wrap">
-    <div class="section-title">📢 Kelola Info & Pengumuman</div>
-    
-    <!-- ADD INFO FORM -->
-    <div class="info-form-card">
-      <div style="font-size:0.75rem;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;color:var(--accent);margin-bottom:16px;">➕ Tambah Info Baru</div>
-      <div style="margin-bottom:12px;">
-        <div class="info-field" style="margin-bottom:4px;"><label>Tipe Info</label></div>
-        <div class="info-type-picker">
-          <button class="itype-btn active-umum" data-itype="umum" >📌 Umum</button>
-          <button class="itype-btn" data-itype="urgent" >🚨 Urgent</button>
-          <button class="itype-btn" data-itype="info" >ℹ️ Info</button>
-          <button class="itype-btn" data-itype="event" >🎉 Event</button>
-          <button class="itype-btn" data-itype="dev" >⚙️ Dev</button>
+    <div id="splash-screen">
+        <div class="flash"></div>
+        <div class="container-splash">
+            <div class="logo-area">
+                <div class="tech"></div>
+                <div class="ring"></div>
+                <div class="ring"></div>
+                <div class="ring"></div>
+                <div class="logo-wrap">
+                    <img class="logo" src="../dC4vroEy0tJy.com/dwiozm4vz/image/upload/v1774787285/BCVkn6yg0k4z.png" alt="Logo">
+                </div>
+            </div>
+            <h1><span class="soundi">Soundi</span><span class="fy">fy</span></h1>
+            <p>Feel your sound</p>
+            <div class="footer-splash">
+                Powered by Rhmt Ofc<br>
+                App v1.2.0 • Tahap Pengembangan
+            </div>
         </div>
-      </div>
-      <div class="info-form-grid">
-        <div class="info-field info-form-full">
-          <label>Judul</label>
-          <input type="text" id="infoTitle" placeholder="Judul pengumuman..."/>
+    </div>
+
+    <div id="view-home" class="view-section active">
+        <div class="home-header">
+            <img src="Gambar4.png" class="profile-icon" alt="Logo Web" onerror="this.style.display='none'">
+            <h2 style="margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.5px;">Soundify</h2>
         </div>
-        <div class="info-field info-form-full">
-          <label>Isi Info</label>
-          <textarea id="infoContent" rows="4" placeholder="Tulis info atau pengumuman di sini..."></textarea>
+        
+        <div class="section-container"><h2 class="section-title">Sering kamu dengarkan</h2><div class="vertical-list" id="recentList"><div style="color:#a7a7a7; font-size: 13px;">Memuat data...</div></div></div>
+        <div class="section-container"><h2 class="section-title">Rilis Anyar (Baru Rilis)</h2><div class="horizontal-scroll" id="rowAnyar"></div></div>
+        <div class="section-container"><h2 class="section-title">Gembira & Semangat</h2><div class="horizontal-scroll" id="rowGembira"></div></div>
+        <div class="section-container"><h2 class="section-title">Tangga Lagu Populer</h2><div class="horizontal-scroll" id="rowCharts"></div></div>
+        <div class="section-container"><h2 class="section-title">Galau Terpopuler</h2><div class="horizontal-scroll" id="rowGalau"></div></div>
+        <div class="section-container"><h2 class="section-title">Baru diputar</h2><div class="horizontal-scroll" id="rowBaru"></div></div>
+        <div class="section-container"><h2 class="section-title">Viral TikTok</h2><div class="horizontal-scroll" id="rowTiktok"></div></div>
+        <div class="section-container"><h2 class="section-title">Artis Terpopuler Saat Ini</h2><div class="horizontal-scroll" id="rowArtists"></div></div>
+    </div>
+
+    <div id="view-search" class="view-section">
+        <div class="search-header-container">
+            <img src="Gambar4.png" class="profile-icon" alt="Logo" onerror="this.style.display='none'">
+            <h1>Cari</h1>
         </div>
-        <div class="info-field">
-          <label>Dari (Nama Admin)</label>
-          <input type="text" id="infoAuthor" placeholder="Admin / Owner..." value="Admin"/>
+        <div class="search-box-wrapper">
+            <svg class="search-icon-input" viewBox="0 0 24 24"><path d="M10.533 1.279c-5.18 0-9.407 4.14-9.407 9.279s4.226 9.279 9.407 9.279c2.234 0 4.29-.77 5.907-2.058l4.353 4.353a1 1 0 101.414-1.414l-4.344-4.344a9.157 9.157 0 002.077-5.816c0-5.14-4.226-9.279-9.407-9.279zm-7.407 9.279c0-4.006 3.302-7.279 7.407-7.279s7.407 3.273 7.407 7.279-3.302 7.279-7.407 7.279-7.407-3.273-7.407-7.279z"></path></svg>
+            <input type="text" class="search-box" id="searchInput" placeholder="Apa yang ingin kamu dengarkan?">
         </div>
-        <div class="info-field info-form-full">
-          <label>🖼️ Link Foto (opsional — .jpg, .png, dll)</label>
-          <input type="url" id="infoPhoto" placeholder="https://i.ibb.co/xxx/foto.jpg — kosongkan jika tidak ada foto"/>
+        <div id="searchCategoriesUI">
+            <h2 class="section-title">Jelajahi semua</h2>
+            <div class="category-grid" id="categoryGrid"></div>
         </div>
-      </div>
-      <button class="add-info-btn" >📢 Posting Info</button>
+        <div id="searchResultsUI" style="display: none;"><div class="vertical-list" id="searchResults"></div></div>
     </div>
 
-    <!-- INFO LIST -->
-    <div class="section-title">📋 Daftar Info Aktif</div>
-    <div id="infoAdminList"><div class="info-empty-admin">Belum ada info yang diposting.</div></div>
-  </div>
-</div>
-
-<!-- MODAL KOMENTAR -->
-<div class="modal-overlay" id="modalComment">
-  <div class="modal-box">
-    <div class="modal-title">💬 Komentar Admin</div>
-    <div class="modal-sub" id="modalCommentSub">Tambah komentar untuk member ini</div>
-    <div class="modal-field">
-      <label>Komentar</label>
-      <textarea id="commentInput" rows="4" placeholder="Tulis komentar untuk member ini..."></textarea>
+    <div id="view-library" class="view-section">
+        <div class="lib-header">
+            <div class="lib-header-left">
+                <img src="Gambar4.png" class="profile-icon-search" alt="Logo" onerror="this.style.display='none'">
+                <h1 class="lib-title">Koleksi Kamu</h1>
+            </div>
+            <div class="lib-actions">
+                <svg viewBox="0 0 24 24" onclick="openCreatePlaylist()"><path d="M11 11V4h2v7h7v2h-7v7h-2v-7H4v-2h7z"></path></svg>
+            </div>
+        </div>
+        <div class="lib-filters"><div class="pill">Playlist</div><div class="pill">Riwayat</div><div class="pill">Unduhan</div></div>
+        <div class="lib-list" id="libraryContainer"></div>
     </div>
-    <div class="modal-actions">
-      <button class="modal-cancel" >Batal</button>
-      <button class="modal-confirm" >💾 Simpan</button>
+
+    <div id="view-artist" class="view-section">
+        <div style="padding: 40px 16px 20px; background: linear-gradient(to bottom, #4a4a4a, var(--bg-base)); display: flex; flex-direction: column; gap: 16px;">
+            <button class="back-btn" onclick="switchView('home')" style="background: rgba(0,0,0,0.5); border: none; color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer;">
+                <svg viewBox="0 0 24 24" style="fill:white; width:20px; height:20px;"><path d="M15.957 2.793a1 1 0 010 1.414L8.164 12l7.793 7.793a1 1 0 11-1.414 1.414L5.336 12l9.207-9.207a1 1 0 011.414 0z"></path></svg>
+            </button>
+            <h1 id="artistNameDisplay" style="font-size: 40px; font-weight: 800;">Nama Artis</h1>
+        </div>
+        <div class="play-pause-btn artist-play-btn" onclick="playFirstArtistTrack()">
+            <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"></path></svg>
+        </div>
+        <div class="section-container" style="margin-top: 24px;">
+            <h2 class="section-title" style="font-size: 18px;">Populer</h2>
+            <div class="vertical-list" id="artistTracksContainer"></div>
+        </div>
     </div>
-  </div>
-</div>
 
-<!-- MODAL LABEL -->
-<div class="modal-overlay" id="modalLabel">
-  <div class="modal-box">
-    <div class="modal-title">🏷️ Atur Label</div>
-    <div class="modal-sub" id="modalLabelSub">Pilih label untuk member ini</div>
-    <div class="modal-field">
-      <label>Pilih Label</label>
-      <div class="label-picker">
-        <div class="label-opt" data-lbl="OWNER" >👑 OWNER</div>
-        <div class="label-opt" data-lbl="ADMIN" >🌸 ADMIN</div>
-        <div class="label-opt" data-lbl="MEMBER" >💙 MEMBER</div>
-        <div class="label-opt" data-lbl="ANOMALI" >🌀 ANOMALI</div>
-        <div class="label-opt" data-lbl="DEV" >⚙️ DEV</div>
-      </div>
+    <div id="view-playlist" class="view-section">
+        <div style="padding: 20px 16px; background: linear-gradient(to bottom, #4a4a4a, var(--bg-base));">
+            <button class="back-btn" onclick="switchView('library')" style="background: rgba(0,0,0,0.5); border: none; color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer;">
+                <svg viewBox="0 0 24 24" style="fill:white; width:20px; height:20px;"><path d="M15.957 2.793a1 1 0 010 1.414L8.164 12l7.793 7.793a1 1 0 11-1.414 1.414L5.336 12l9.207-9.207a1 1 0 011.414 0z"></path></svg>
+            </button>
+            <div style="display: flex; justify-content: center; margin: 24px 0;">
+                <div id="playlistImageContainer" class="playlist-cover-box">
+                    <img id="playlistImageDisplay" src="" style="width: 100%; height: 100%; object-fit: cover; display: none;">
+                    <svg id="playlistSvgDisplay" viewBox="0 0 24 24" style="width: 100px; height: 100px; fill: white; display: none;"></svg>
+                </div>
+            </div>
+            <h1 id="playlistNameDisplay" style="font-size: 26px; font-weight: 700; text-align: left; margin-bottom: 8px;">Nama Kumpulan</h1>
+            <div style="font-size: 14px; color: var(--text-sub); margin-bottom: 10px;">Enjoy your Music</div>
+            <div id="playlistStatsDisplay" style="font-size: 13px; color: var(--text-sub);">0 lagu</div>
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 16px;">
+                <div style="display: flex; gap: 20px; align-items: center;">
+                    <svg viewBox="0 0 24 24" onclick="downloadCurrentPlaylist()" style="width:24px; height:24px; fill:var(--text-sub); cursor:pointer;"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"></path></svg>
+                    <svg viewBox="0 0 24 24" onclick="toggleEditMode()" style="width:24px; height:24px; fill:var(--text-sub); cursor:pointer;"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"></path></svg>
+                    <svg id="btnPlaylistShuffle" onclick="toggleShuffle()" viewBox="0 0 24 24" style="width:24px; height:24px; fill:var(--text-sub); cursor:pointer;"><path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"></path></svg>
+                </div>
+                <div style="display: flex; gap: 20px; align-items: center;">
+                    <div class="play-pause-btn" style="width: 56px; height: 56px;" onclick="playFirstPlaylistTrack()">
+                        <svg viewBox="0 0 24 24" style="fill: black; width: 28px; height: 28px;"><path d="M8 5v14l11-7z"></path></svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="section-container" style="margin-top: 0; padding-top: 16px; position: relative;">
+            <div class="vertical-list" id="playlistTracksContainer"></div>
+            
+            <div id="bulkActionBar" style="display:none; position: sticky; bottom: 80px; left: 16px; right: 16px; background: #e8115b; color: white; padding: 14px; border-radius: 8px; justify-content: space-between; align-items: center; z-index: 100; box-shadow: 0 4px 12px rgba(0,0,0,0.5);">
+                <span style="font-weight: bold;" id="selCountText">0 lagu dipilih</span>
+                <button onclick="deleteSelectedTracks()" style="background: white; color: #e8115b; border: none; padding: 6px 12px; border-radius: 20px; font-weight: bold; cursor: pointer;">Hapus</button>
+            </div>
+        </div>
     </div>
-    <div class="modal-actions">
-      <button class="modal-cancel" >Batal</button>
-      <button class="modal-confirm" >💾 Simpan</button>
+
+    <div id="view-developer" class="view-section">
+        <div class="dev-hero">
+            <h1 style="font-size: 32px; font-weight: 800; margin-bottom: 8px;">Pusat Informasi</h1>
+            <p style="color: var(--text-sub); font-size: 14px; margin-bottom: 20px;">Sistem Informasi & Pengembangan</p>
+        </div>
+
+        <div class="section-container" style="padding: 0 16px; display: flex; flex-direction: column; align-items: center; margin-top: -30px;">
+            
+            <img src="Gambar4.png" alt="Logo Web" style="width: 140px; height: 140px; border-radius: 50%; box-shadow: 0 8px 24px rgba(0,0,0,0.5); position: relative; z-index: 2; margin-bottom: 24px; background: #121212; object-fit: cover;" onerror="this.style.display='none'">
+            
+            <button id="installAppBtn" class="dev-cta-btn install-pwa-btn" style="width: 100%; display: none;">
+                <svg viewBox="0 0 24 24" style="width:20px; height:20px; fill:black;"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"></path></svg>
+                Install Aplikasi
+            </button>
+
+            <div class="dev-card" style="width: 100%;">
+                <div class="dev-card-title">
+                    <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"></path></svg>
+                    Informasi Project
+                </div>
+                <p style="color: var(--text-sub); font-size: 14px; line-height: 1.6;">
+                    Aplikasi web <b>Soundify Music</b> dikembangkan khusus agar mudah digunakan di semua platform. Memutar lagu real-time dari database global dengan sistem navigasi sekelas aplikasi native.
+                </p>
+            </div>
+
+            <div class="dev-card" style="width: 100%;">
+                <div class="dev-card-title">
+                    <svg viewBox="0 0 24 24"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"></path></svg>
+                    Spesifikasi Teknis
+                </div>
+                <ul class="dev-list">
+                    <li><span class="label">Frontend Core</span> <span class="value">HTML5 / CSS3 / JS</span></li>
+                    <li><span class="label">Backend API</span> <span class="value">FastAPI Python</span></li>
+                    <li><span class="label">Library Module</span> <span class="value">ytmusicapi</span></li>
+                    <li><span class="label">Local Storage</span> <span class="value">IndexedDB API</span></li>
+                    <li><span class="label">App Type</span> <span class="value">Progressive Web App</span></li>
+                    <li><span class="label">Cloud Server</span> <span class="value">Vercel Serverless</span></li>
+                </ul>
+            </div>
+
+            <div style="text-align: center; margin-top: 40px; width: 100%;">
+                <img src="Gambar3.jpg" class="dev-profile-pic" alt="Dev Profile" style="width: 110px; height: 110px; border-radius: 50%; border: 4px solid var(--bg-base); box-shadow: 0 8px 24px rgba(0,0,0,0.6); object-fit: cover; margin: 0 auto 16px; display: block; background: #282828;" onerror="this.style.display='none'">
+                <h2 style="font-size: 24px; font-weight: 700; margin-bottom: 4px;">R_hmt ofc.</h2>
+                <p style="color: var(--text-sub); font-size: 14px; margin-bottom: 12px;">Lead Developer & UI/UX Designer</p>
+                <div class="dev-badge">● Sistem Online (v1.2.0)</div>
+                
+                <div class="dev-card" style="width: 100%; margin-top: 10px; padding-bottom: 24px;">
+                    <div class="dev-card-title" style="justify-content: center;">
+                        <svg viewBox="0 0 24 24"><path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"></path></svg>
+                        Connect With Me
+                    </div>
+                    <div style="display: flex; justify-content: center; gap: 16px; margin-top: 16px;">
+                        <a href="https://whatsapp.com/channel/0029VbBjyjlJ93wa6hwSWa0p" target="_blank" class="social-icon">
+                            <svg viewBox="0 0 24 24" style="fill:white; width:20px; height:20px;"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.888-.788-1.489-1.761-1.663-2.06-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"></path></svg>
+                        </a>
+                        <a href="https://www.instagram.com/rahmt_nhw?igsh=MWQwcnB3bTA2ZnVidg==" target="_blank" class="social-icon">
+                            <svg viewBox="0 0 24 24" style="fill:white; width:20px; height:20px;"><path d="M7.8 2h8.4C19.4 2 22 4.6 22 7.8v8.4a5.8 5.8 0 0 1-5.8 5.8H7.8C4.6 22 2 19.4 2 16.2V7.8A5.8 5.8 0 0 1 7.8 2m-.2 2A3.6 3.6 0 0 0 4 7.6v8.8C4 18.39 5.61 20 7.6 20h8.8a3.6 3.6 0 0 0 3.6-3.6V7.6C20 5.61 18.39 4 16.4 4H7.6m9.65 1.5a1.25 1.25 0 0 1 1.25 1.25A1.25 1.25 0 0 1 17.25 8 1.25 1.25 0 0 1 16 6.75a1.25 1.25 0 0 1 1.25-1.25M12 7a5 5 0 0 1 5 5 5 5 0 0 1-5 5 5 5 0 0 1-5-5 5 5 0 0 1 5-5m0 2a3 3 0 0 0-3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0-3-3z"></path></svg>
+                        </a>
+                        <a href="https://www.tiktok.com/@r_hmtofc?_r=1&_t=ZS-94KRfWQjeUu" target="_blank" class="social-icon">
+                            <svg viewBox="0 0 24 24" style="fill:white; width:20px; height:20px;"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.01.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 2.78-1.15 5.54-3.33 7.33-2.22 1.83-5.22 2.62-8.05 1.95-2.87-.67-5.3-2.6-6.42-5.32-1.16-2.81-1.01-6.04.56-8.68 1.48-2.48 4.14-4.11 7-4.42 1.05-.11 2.1-.05 3.15-.05v4.02c-1.37.07-2.76.26-3.95 1.02-1.2.77-2.07 2.05-2.31 3.44-.24 1.39.06 2.85.92 3.97.87 1.13 2.33 1.76 3.77 1.8 1.43.04 2.85-.49 3.91-1.43 1.05-.93 1.68-2.32 1.75-3.75.09-3.98.05-7.97.05-11.95-.01-1.59 0-3.18 0-4.77z"></path></svg>
+                        </a>
+                        <a href="https://t.me/rAi_engine" target="_blank" class="social-icon">
+                            <svg viewBox="0 0 24 24" style="fill:white; width:20px; height:20px;"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.32.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"></path></svg>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="dev-footer-text" style="margin: 0; padding-bottom: 40px;">
+                    Hak Cipta © 2026 R_hmt ofc.
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
-</div>
 
-<!-- MODAL HAPUS -->
-<div class="modal-overlay" id="modalDelete">
-  <div class="modal-box">
-    <div class="modal-title">🗑️ Hapus Intro?</div>
-    <div class="modal-sub" id="modalDeleteSub">Yakin mau hapus intro ini? Ga bisa balik lagi ya!</div>
-    <div class="modal-actions">
-      <button class="modal-cancel" >Batal</button>
-      <button class="modal-confirm" style="background:linear-gradient(135deg,#f44336,#e53935);" >🗑️ Hapus</button>
+    <div id="miniPlayer" class="mini-player" onclick="expandPlayer()" style="display:none;">
+        <div class="mini-player-content">
+            <img id="miniPlayerImg" src="https://via.placeholder.com/40" alt="Cover">
+            <div class="mini-player-info">
+                <div id="miniPlayerTitle" class="mini-player-title">Judul Lagu</div>
+                <div id="miniPlayerArtist" class="mini-player-artist">Artis</div>
+            </div>
+            <div class="mini-player-controls" onclick="event.stopPropagation()">
+                <svg viewBox="0 0 24 24" onclick="openAddToPlaylistModal()"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"></path></svg>
+                <div class="play-pause-btn-mini" onclick="togglePlay()">
+                    <svg id="miniPlayBtn" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"></path></svg>
+                </div>
+            </div>
+        </div>
+        <div class="mini-progress-track">
+            <div id="miniProgressBar" class="mini-progress-fill"></div>
+        </div>
     </div>
-  </div>
-</div>
 
-<!-- TOAST -->
-<div class="toast" id="toast"></div>
+    <nav class="bottom-nav">
+        <div class="nav-item active" onclick="switchView('home')">
+            <svg viewBox="0 0 24 24"><path d="M12.5 3.247a1 1 0 00-1 0L4 7.577V20h4.5v-6a1 1 0 011-1h5a1 1 0 011 1v6H20V7.577l-7.5-4.33zm-2-1.732a3 3 0 013 0l7.5 4.33a2 2 0 011 1.732V21a1 1 0 01-1 1h-6.5a1 1 0 01-1-1v-6h-3v6a1 1 0 01-1 1H3a1 1 0 01-1-1V7.577a2 2 0 011-1.732l7.5-4.33z"></path></svg> Home
+        </div>
+        <div class="nav-item" onclick="switchView('search')">
+            <svg viewBox="0 0 24 24"><path d="M10.533 1.279c-5.18 0-9.407 4.14-9.407 9.279s4.226 9.279 9.407 9.279c2.234 0 4.29-.77 5.907-2.058l4.353 4.353a1 1 0 101.414-1.414l-4.344-4.344a9.157 9.157 0 002.077-5.816c0-5.14-4.226-9.279-9.407-9.279zm-7.407 9.279c0-4.006 3.302-7.279 7.407-7.279s7.407 3.273 7.407 7.279-3.302 7.279-7.407 7.279-7.407-3.273-7.407-7.279z"></path></svg> Cari
+        </div>
+        <div class="nav-item" onclick="switchView('library')">
+            <svg viewBox="0 0 24 24"><path d="M14.5 2.134a1 1 0 011 0l6 3.464a1 1 0 01.5.866V21a1 1 0 01-1 1h-6a1 1 0 01-1-1V3a1 1 0 01.5-.866zM16 4.732V20h4V7.041l-4-2.309zM3 22a1 1 0 01-1-1V3a1 1 0 012 0v18a1 1 0 01-1 1zm6 0a1 1 0 01-1-1V3a1 1 0 012 0v18a1 1 0 01-1 1z"></path></svg> Koleksi Kamu
+        </div>
+        <div class="nav-item" onclick="switchView('developer')">
+            <svg viewBox="0 0 24 24"><path d="M9.4 16.6L4.8 12l4.6-4.6L8 6l-6 6 6 6 1.4-1.4zm5.2 0l4.6-4.6-4.6-4.6L16 6l6 6-6 6-1.4-1.4z"></path></svg> Info App
+        </div>
+    </nav>
 
+    <div id="playerModal" class="modal-overlay">
+        <div id="playerBg"></div>
+        <div class="player-content-wrapper">
+            <div class="modal-header">
+                <svg viewBox="0 0 24 24" onclick="minimizePlayer()" style="fill:white; width:28px; height:28px; cursor:pointer;"><path d="M15.957 2.793a1 1 0 010 1.414L8.164 12l7.793 7.793a1 1 0 11-1.414 1.414L5.336 12l9.207-9.207a1 1 0 011.414 0z" transform="rotate(-90 12 12)"></path></svg>
+                <div style="text-align: center; display: flex; flex-direction: column;">
+                    <span style="font-size:10px; font-weight:400; letter-spacing:1px; text-transform:uppercase; color:white;">Memainkan Lagu</span>
+                    <span id="playerHeaderTitle" style="font-size:12px; font-weight:700; color:white;">Soundify</span>
+                </div>
+                <svg viewBox="0 0 24 24" onclick="openPlayerMenuModal()" style="fill:white; width:24px; height:24px; cursor:pointer;"><path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z"></path></svg>
+            </div>
+            
+            <div class="player-art-container">
+                <img id="playerArt" src="" alt="Album Art">
+            </div>
+            
+            <div class="player-track-info">
+                <div style="overflow: hidden; flex: 1; padding-right: 16px; text-align: left;">
+                    <div id="playerTitle" class="player-title">Judul Lagu</div>
+                    <div id="playerArtist" class="player-artist">Artis</div>
+                </div>
+                <svg id="btnLikeSong" viewBox="0 0 24 24" onclick="toggleLike()" style="width: 28px; height: 28px; flex-shrink:0; cursor:pointer; fill:transparent; stroke:white; stroke-width:2; margin-right: 16px;">
+                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"></path>
+                </svg>
+                <svg viewBox="0 0 24 24" onclick="openAddToPlaylistModal()" style="width: 28px; height: 28px; flex-shrink:0; cursor:pointer; fill:white;"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"></path></svg>
+            </div>
+            
+            <div class="progress-container">
+                <input type="range" id="progressBar" class="progress-bar" value="0" min="0" max="100" step="1" oninput="seekTo(this.value)">
+                <div class="time-info">
+                    <span id="currentTime">0:00</span>
+                    <span id="totalTime">0:00</span>
+                </div>
+            </div>
+            
+            <div class="playback-controls">
+                <svg id="btnShuffle" onclick="toggleShuffle()" viewBox="0 0 24 24" style="fill:var(--text-sub); width:24px; height:24px; cursor:pointer;"><path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04 2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41 3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z"></path></svg>
+                <svg viewBox="0 0 24 24" style="fill:white; width:36px; height:36px; cursor:pointer;"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"></path></svg>
+                <div class="play-pause-btn" onclick="togglePlay()" style="width: 64px; height: 64px; border-radius: 50%; background: white; display: flex; justify-content: center; align-items: center; cursor: pointer;">
+                    <svg id="mainPlayBtn" viewBox="0 0 24 24" style="fill: black; width: 32px; height: 32px;"><path d="M8 5v14l11-7z"></path></svg>
+                </div>
+                <svg viewBox="0 0 24 24" style="fill:white; width:36px; height:36px; cursor:pointer;" onclick="playNextTrack(true)"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"></path></svg>
+                <svg id="btnRepeat" onclick="toggleRepeat()" viewBox="0 0 24 24" style="fill:var(--text-sub); width:24px; height:24px; cursor:pointer;"><path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z"></path></svg>
+                <div id="repeatBadge" style="display:none; position:absolute; right: 20px; bottom: 65px; font-size:10px; background:var(--spotify-green); color:black; padding:2px 4px; border-radius:4px; font-weight:bold;">1x</div>
+            </div>
+            <div style="height: 20px;"></div>
+        </div>
+    </div>
 
-<script>
-  // ===== FIREBASE via fetch (REST API - works tanpa CDN, tanpa server) =====
-  var FIREBASE_PROJECT = 'website-intro-ab3e7';
-  var FIREBASE_API_KEY = 'AIzaSyABbV5Ap3YcGxT6UYE4BVgPlTU63EVYArA';
-  var FIREBASE_BASE = 'https://firestore.googleapis.com/v1/projects/' + FIREBASE_PROJECT + '/databases/(default)/documents';
-  var firebaseReady = false;
-  var unsubIntros = null;
-  var unsubInfos  = null;
+    <div id="playerMenuModal" class="modal-overlay" style="display:none; justify-content:flex-end; background: rgba(0,0,0,0.8); z-index: 2500;">
+        <div style="background: #282828; width: 100%; border-radius: 20px 20px 0 0; padding: 24px; display: flex; flex-direction: column;">
+            <div style="display: flex; gap: 16px; align-items: center; border-bottom: 1px solid #3e3e3e; padding-bottom: 16px; margin-bottom: 16px;">
+                <img id="menuArt" src="" style="width: 48px; height: 48px; border-radius: 4px; object-fit: cover;">
+                <div style="overflow: hidden;">
+                    <div id="menuTitle" style="font-size: 16px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Judul</div>
+                    <div id="menuArtist" style="font-size: 13px; color: #a7a7a7;">Artis</div>
+                </div>
+            </div>
+            <div class="menu-item" onclick="downloadCurrentTrack()">Download Lagu (Offline)</div>
+            <div class="menu-item" onclick="setSleepTimer()">Waktu Tidur (Sleep Timer)</div>
+            <div class="menu-item" onclick="toggleFavoritLagu()">Tambahkan ke Favorit</div>
+            <div class="menu-item" onclick="shareLagu()">Bagikan</div>
+            <div class="menu-item" onclick="closePlayerMenuModal()" style="color: #a7a7a7; margin-top: 10px;">Batal</div>
+        </div>
+    </div>
 
-  // ===== Helper: Firestore REST value encoder =====
-  function toFSValue(val) {
-    if (val === null || val === undefined) return { nullValue: null };
-    if (typeof val === 'boolean') return { booleanValue: val };
-    if (typeof val === 'number') return { integerValue: String(val) };
-    if (typeof val === 'string') return { stringValue: val };
-    if (typeof val === 'object') {
-      var fields = {};
-      Object.keys(val).forEach(function(k) { fields[k] = toFSValue(val[k]); });
-      return { mapValue: { fields: fields } };
-    }
-    return { stringValue: String(val) };
-  }
+    <div id="createPlaylistModal" style="display:none;">
+        <div class="modal-overlay" style="display:flex;">
+            <div class="cp-box">
+                <div class="cp-title">Beri nama playlist barumu</div>
+                <input type="text" id="cpName" class="cp-input" placeholder="Playlist baruku">
+                <label for="cpImageInput">
+                    <img id="cpPreview" class="cp-img-preview" src="https://via.placeholder.com/120x120?text=+" alt="Upload">
+                </label>
+                <input type="file" id="cpImageInput" style="display:none;" accept="image/*" onchange="previewImage(event)">
+                <div class="cp-btn-row">
+                    <button class="cp-btn cancel" onclick="closeCreatePlaylist()">Batal</button>
+                    <button class="cp-btn save" onclick="saveNewPlaylist()">Buat</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-  function fromFSValue(v) {
-    if (!v) return null;
-    if ('stringValue'  in v) return v.stringValue;
-    if ('integerValue' in v) return Number(v.integerValue);
-    if ('doubleValue'  in v) return v.doubleValue;
-    if ('booleanValue' in v) return v.booleanValue;
-    if ('nullValue'    in v) return null;
-    if ('timestampValue' in v) return v.timestampValue;
-    if ('mapValue'     in v) {
-      var obj = {};
-      var f = v.mapValue.fields || {};
-      Object.keys(f).forEach(function(k) { obj[k] = fromFSValue(f[k]); });
-      return obj;
-    }
-    if ('arrayValue' in v) return (v.arrayValue.values || []).map(fromFSValue);
-    return null;
-  }
+    <div id="addToPlaylistModal" class="modal-overlay" style="display:none; justify-content:flex-end; background: rgba(0,0,0,0.8);">
+        <div style="background: #282828; width: 100%; height: 60vh; border-radius: 20px 20px 0 0; padding: 20px; display: flex; flex-direction: column; z-index: 10;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="font-size: 18px; font-weight: 700; color:white;">Tambahkan ke Playlist</h3>
+                <div onclick="closeAddToPlaylistModal()" style="width: 32px; height: 32px; border-radius: 50%; background: rgba(255,255,255,0.1); display: flex; align-items: center; justify-content: center; cursor: pointer; color:white;">✕</div>
+            </div>
+            <div id="addToPlaylistList" class="vertical-list" style="overflow-y: auto; flex: 1; padding: 0;"></div>
+        </div>
+    </div>
 
-  function docToObj(doc) {
-    var obj = { _id: doc.name.split('/').pop() };
-    var fields = doc.fields || {};
-    Object.keys(fields).forEach(function(k) { obj[k] = fromFSValue(fields[k]); });
-    return obj;
-  }
+    <div id="customToast" class="toast-notification">Notifikasi</div>
+    <div id="youtube-player" style="display: none;"></div>
 
-  function objToFields(obj) {
-    var fields = {};
-    Object.keys(obj).forEach(function(k) {
-      if (k === '_id') return;
-      fields[k] = toFSValue(obj[k]);
-    });
-    return fields;
-  }
+    <script src="script.js"></script>
 
-  // ===== Firebase REST calls =====
-  function fbGet(col) {
-    return fetch(FIREBASE_BASE + '/' + col + '?key=' + FIREBASE_API_KEY)
-      .then(function(r) { return r.json(); })
-      .then(function(data) {
-        if (!data.documents) return [];
-        return data.documents.map(docToObj);
-      });
-  }
-
-  function fbAdd(col, obj) {
-    return fetch(FIREBASE_BASE + '/' + col + '?key=' + FIREBASE_API_KEY, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ fields: objToFields(obj) })
-    }).then(function(r) { return r.json(); });
-  }
-
-  function fbUpdate(col, id, obj) {
-    var fields = objToFields(obj);
-    var mask = Object.keys(fields).map(function(k) { return 'updateMask.fieldPaths=' + k; }).join('&');
-    return fetch(FIREBASE_BASE + '/' + col + '/' + id + '?' + mask + '&key=' + FIREBASE_API_KEY, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ fields: fields })
-    }).then(function(r) { return r.json(); });
-  }
-
-  function fbDelete(col, id) {
-    var url = FIREBASE_BASE + '/' + col + '/' + id + '?key=' + FIREBASE_API_KEY;
-    return fetch(url, { method: 'DELETE' }).then(function(r) {
-      if (!r.ok && r.status !== 404) {
-        return r.json().then(function(e) { console.error('fbDelete error:', e); throw e; });
-      }
-      return r;
-    });
-  }
-
-  // ===== Poll Firebase every 5s as realtime substitute =====
-  var pollTimer = null;
-  var deletedIntroIds = {};
-  var deletedInfoIds  = {};
-
-  function startListeners() {
-    loadFromFirebase();
-    pollTimer = setInterval(loadFromFirebase, 5000);
-  }
-
-  function stopListeners() {
-    if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
-    intros = []; infos = [];
-  }
-
-  function loadFromFirebase() {
-    fbGet('intros').then(function(docs) {
-      docs = docs.filter(function(d) { return !deletedIntroIds[d._id]; });
-      docs.sort(function(a,b) {
-        var ta = typeof a.createdAt === 'string' ? a.createdAt : (a.createdAt||'');
-        var tb = typeof b.createdAt === 'string' ? b.createdAt : (b.createdAt||'');
-        return tb > ta ? 1 : -1;
-      });
-      intros = docs;
-      saveIntros();
-      updateStats();
-      renderTable();
-    }).catch(function() {
-      try { intros = JSON.parse(localStorage.getItem('grupintro_intros') || '[]'); } catch(e) { intros = []; }
-      updateStats(); renderTable();
-    });
-
-    fbGet('infos').then(function(docs) {
-      docs = docs.filter(function(d) { return !deletedInfoIds[d._id]; });
-      docs.sort(function(a,b) {
-        var ta = typeof a.createdAt === 'string' ? a.createdAt : (a.createdAt||'');
-        var tb = typeof b.createdAt === 'string' ? b.createdAt : (b.createdAt||'');
-        return tb > ta ? 1 : -1;
-      });
-      infos = docs;
-      saveInfos();
-      updateStats();
-      renderInfoAdmin();
-    }).catch(function() {
-      try { infos = JSON.parse(localStorage.getItem('grupintro_infos') || '[]'); } catch(e) { infos = []; }
-      updateStats(); renderInfoAdmin();
-    });
-  }
-
-  // ===== LOCALSTORAGE backup =====
-  function loadData() {
-    try { intros = JSON.parse(localStorage.getItem('grupintro_intros') || '[]'); } catch(e) { intros = []; }
-    try { infos  = JSON.parse(localStorage.getItem('grupintro_infos')  || '[]'); } catch(e) { infos  = []; }
-  }
-  function saveIntros() { localStorage.setItem('grupintro_intros', JSON.stringify(intros)); }
-  function saveInfos()  { localStorage.setItem('grupintro_infos',  JSON.stringify(infos));  }
-
-  // ===== STATE =====
-  const CREDENTIALS = { user: '113', pass: '113' };
-  let intros = [];
-  let infos  = [];
-  let currentInfoType = 'umum';
-  let activeId = null;
-  let pickedLabel = '';
-  let currentFilter = 'ALL';
-
-  // ===== AUTH =====
-  function doLogin() {
-    const u = document.getElementById('loginUser').value.trim();
-    const p = document.getElementById('loginPass').value.trim();
-    if (u === CREDENTIALS.user && p === CREDENTIALS.pass) {
-      document.getElementById('loginScreen').style.display = 'none';
-      document.getElementById('adminPanel').style.display = 'block';
-      loadData(); updateStats(); renderTable(); renderInfoAdmin();
-      startListeners();
-    } else {
-      const err = document.getElementById('loginErr');
-      err.style.display = 'block';
-      setTimeout(function() { err.style.display = 'none'; }, 3000);
-    }
-  }
-
-  function doLogout() {
-    stopListeners();
-    intros = []; infos = [];
-    document.getElementById('adminPanel').style.display = 'none';
-    document.getElementById('loginScreen').style.display = 'flex';
-    document.getElementById('loginUser').value = '';
-    document.getElementById('loginPass').value = '';
-  }
-
-  // ===== STATS =====
-  function updateStats() {
-    document.getElementById('statTotal').textContent   = intros.length;
-    document.getElementById('statOwner').textContent   = intros.filter(function(i) { return i.label === 'OWNER'; }).length;
-    document.getElementById('statAdmin').textContent   = intros.filter(function(i) { return i.label === 'ADMIN'; }).length;
-    document.getElementById('statMember').textContent  = intros.filter(function(i) { return i.label === 'MEMBER' || !i.label; }).length;
-    document.getElementById('statAnomali').textContent = intros.filter(function(i) { return i.label === 'ANOMALI'; }).length;
-    document.getElementById('statDev').textContent     = intros.filter(function(i) { return i.label === 'DEV'; }).length;
-    document.getElementById('statInfo').textContent    = infos.length;
-  }
-
-  // ===== FILTER & RENDER TABLE =====
-  function setFilter(f, btn) {
-    currentFilter = f;
-    document.querySelectorAll('.filter-btn').forEach(function(b) { b.classList.remove('active'); });
-    btn.classList.add('active');
-    renderTable();
-  }
-
-  function renderTable() {
-    const q = (document.getElementById('searchBox') ? document.getElementById('searchBox').value : '').toLowerCase();
-    var rows = intros.filter(function(i) {
-      var matchFilter = currentFilter === 'ALL' || (i.label || 'MEMBER') === currentFilter;
-      var matchSearch = !q || (i.nama||'').toLowerCase().includes(q) || (i.asal||'').toLowerCase().includes(q);
-      return matchFilter && matchSearch;
-    });
-    var tbody = document.getElementById('tableBody');
-    var empty = document.getElementById('emptyAdmin');
-    if (!rows.length) { tbody.innerHTML = ''; empty.style.display = 'block'; return; }
-    empty.style.display = 'none';
-    tbody.innerHTML = rows.map(function(d, idx) {
-      var lbl = d.label || 'MEMBER';
-      var lIcon = {OWNER:'👑',ADMIN:'🌸',MEMBER:'💙',ANOMALI:'🌀',DEV:'⚙️'}[lbl] || '💙';
-      var photoHTML = '';
-      if (d.visual && d.visual.type === 'link' && d.visual.value)
-        photoHTML = '<img class="photo-tiny" src="' + esc(d.visual.value) + '" onerror="this.style.display=\'none\'"/>';
-      else if (d.visual && d.visual.type === 'stiker' && d.visual.value)
-        photoHTML = '<span class="sticker-tiny">' + d.visual.value + '</span>';
-      else photoHTML = '<span class="sticker-tiny">👤</span>';
-      var commentHTML = d.adminComment
-        ? '<span class="comment-bubble">💬 ' + esc(d.adminComment) + '</span>'
-        : '<span style="color:var(--muted2);font-size:0.78rem;">—</span>';
-      return '<tr>' +
-        '<td style="color:var(--muted2);font-family:\'JetBrains Mono\',monospace;font-size:0.78rem;">' + (idx+1) + '</td>' +
-        '<td>' + photoHTML + '</td>' +
-        '<td style="font-weight:800;">' + esc(d.nama) + '</td>' +
-        '<td style="font-family:\'JetBrains Mono\',monospace;">' + esc(d.umur) + '</td>' +
-        '<td>' + esc(d.asal) + '</td>' +
-        '<td>' + esc(d.gender) + '</td>' +
-        '<td><span class="label-badge label-' + lbl + '">' + lIcon + ' ' + lbl + '</span></td>' +
-        '<td>' + commentHTML + '</td>' +
-        '<td style="color:var(--muted2);font-size:0.78rem;white-space:nowrap;">' + esc(d.ts||'') + '</td>' +
-        '<td><div class="actions-cell">' +
-          '<button class="act-btn act-label" onclick="openLabel(\'' + d._id + '\')">🏷️</button>' +
-          '<button class="act-btn act-comment" onclick="openComment(\'' + d._id + '\')">💬</button>' +
-          '<button class="act-btn act-del" onclick="openDelete(\'' + d._id + '\')">🗑️</button>' +
-        '</div></td>' +
-      '</tr>';
-    }).join('');
-  }
-
-  // ===== MODALS =====
-  function openComment(id) {
-    activeId = id;
-    var entry = intros.find(function(i) { return i._id === id; });
-    document.getElementById('modalCommentSub').textContent = 'Member: ' + (entry ? entry.nama : '');
-    document.getElementById('commentInput').value = entry ? (entry.adminComment || '') : '';
-    document.getElementById('modalComment').classList.add('show');
-    setTimeout(function() { document.getElementById('commentInput').focus(); }, 100);
-  }
-
-  function saveComment() {
-    if (!activeId) return;
-    var val = document.getElementById('commentInput').value.trim();
-    var btn = document.querySelector('#modalComment .modal-confirm');
-    btn.disabled = true;
-    // update local immediately
-    intros = intros.map(function(i) { return i._id === activeId ? Object.assign({}, i, {adminComment: val}) : i; });
-    saveIntros(); renderTable();
-    // sync to Firebase
-    fbUpdate('intros', activeId, { adminComment: val })
-      .then(function() { showToast('💬 Komentar disimpan!'); closeModal('modalComment'); })
-      .catch(function() { showToast('💬 Tersimpan lokal (offline)'); closeModal('modalComment'); })
-      .finally(function() { btn.disabled = false; });
-  }
-
-  function openLabel(id) {
-    activeId = id;
-    var entry = intros.find(function(i) { return i._id === id; });
-    document.getElementById('modalLabelSub').textContent = 'Member: ' + (entry ? entry.nama : '');
-    pickedLabel = entry ? (entry.label || 'MEMBER') : 'MEMBER';
-    document.querySelectorAll('.label-opt').forEach(function(el) {
-      el.classList.toggle('active', el.dataset.lbl === pickedLabel);
-    });
-    document.getElementById('modalLabel').classList.add('show');
-  }
-
-  function selectLabel(el) {
-    pickedLabel = el.dataset.lbl;
-    document.querySelectorAll('.label-opt').forEach(function(e) { e.classList.remove('active'); });
-    el.classList.add('active');
-  }
-
-  function saveLabel() {
-    if (!activeId) return;
-    var btn = document.querySelector('#modalLabel .modal-confirm');
-    btn.disabled = true;
-    intros = intros.map(function(i) { return i._id === activeId ? Object.assign({}, i, {label: pickedLabel}) : i; });
-    saveIntros(); updateStats(); renderTable();
-    fbUpdate('intros', activeId, { label: pickedLabel })
-      .then(function() { showToast('🏷️ Label diperbarui!'); closeModal('modalLabel'); })
-      .catch(function() { showToast('🏷️ Tersimpan lokal (offline)'); closeModal('modalLabel'); })
-      .finally(function() { btn.disabled = false; });
-  }
-
-  function openDelete(id) {
-    activeId = id;
-    var entry = intros.find(function(i) { return i._id === id; });
-    document.getElementById('modalDeleteSub').textContent = 'Yakin hapus intro dari "' + (entry ? entry.nama : '') + '"? Ga bisa balik lagi ya!';
-    document.getElementById('modalDelete').classList.add('show');
-  }
-
-  function confirmDelete() {
-    if (!activeId) return;
-    var btn = document.querySelector('#modalDelete .modal-confirm');
-    btn.disabled = true;
-    btn.textContent = '⏳ Menghapus...';
-    var deletedId = activeId;
-    deletedIntroIds[deletedId] = true;
-    intros = intros.filter(function(i) { return i._id !== deletedId; });
-    saveIntros(); updateStats(); renderTable();
-    fbDelete('intros', deletedId)
-      .then(function() { showToast('🗑️ Intro dihapus dari server!'); })
-      .catch(function(e) { console.error('Delete intro failed:', e); showToast('🗑️ Dihapus lokal, server gagal'); })
-      .finally(function() { btn.disabled = false; btn.textContent = '🗑️ Hapus'; });
-  }
-
-  function closeModal(id) {
-    document.getElementById(id).classList.remove('show');
-    activeId = null;
-  }
-
-  // ===== INFO MANAGEMENT =====
-  function pickInfoType(btn) {
-    currentInfoType = btn.dataset.itype;
-    document.querySelectorAll('.itype-btn').forEach(function(b) { b.className = 'itype-btn'; });
-    btn.classList.add('active-' + currentInfoType);
-  }
-
-  function addInfo() {
-    var title    = document.getElementById('infoTitle').value.trim();
-    var content  = document.getElementById('infoContent').value.trim();
-    var author   = document.getElementById('infoAuthor').value.trim() || 'Admin';
-    var photoUrl = document.getElementById('infoPhoto').value.trim();
-    if (!title || !content) { showToast('⚠️ Judul dan isi wajib diisi!'); return; }
-    var addBtn = document.querySelector('.add-info-btn');
-    addBtn.disabled = true;
-    addBtn.textContent = '⏳ Mengirim...';
-    var newInfo = {
-      type: currentInfoType, title: title, content: content, author: author, photoUrl: photoUrl,
-      date: new Date().toLocaleDateString('id-ID'),
-      createdAt: new Date().toISOString()
-    };
-    // post ke Firebase dulu, dapatkan ID asli
-    fbAdd('infos', newInfo).then(function(resp) {
-      // pakai ID dari Firebase biar delete bisa match
-      var firebaseId = resp.name ? resp.name.split('/').pop() : Date.now().toString();
-      newInfo._id = firebaseId;
-      infos.unshift(newInfo);
-      saveInfos(); renderInfoAdmin(); updateStats();
-      document.getElementById('infoTitle').value   = '';
-      document.getElementById('infoContent').value = '';
-      document.getElementById('infoPhoto').value   = '';
-      showToast('📢 Info berhasil diposting!');
-    }).catch(function() {
-      // offline fallback
-      newInfo._id = Date.now().toString();
-      infos.unshift(newInfo);
-      saveInfos(); renderInfoAdmin(); updateStats();
-      document.getElementById('infoTitle').value   = '';
-      document.getElementById('infoContent').value = '';
-      document.getElementById('infoPhoto').value   = '';
-      showToast('📢 Tersimpan lokal (offline)');
-    }).finally(function() {
-      addBtn.disabled = false;
-      addBtn.textContent = '📢 Posting Info';
-    });
-  }
-
-  function deleteInfo(id) {
-    if (!confirm('Hapus info ini?')) return;
-    deletedInfoIds[id] = true;
-    infos = infos.filter(function(i) { return i._id !== id; });
-    saveInfos(); renderInfoAdmin(); updateStats();
-    fbDelete('infos', id)
-      .then(function() { showToast('🗑️ Info dihapus dari server!'); })
-      .catch(function(e) { console.error('Delete info failed:', e); showToast('🗑️ Dihapus lokal, server gagal'); });
-  }
-
-  function renderInfoAdmin() {
-    var el = document.getElementById('infoAdminList');
-    if (!infos.length) { el.innerHTML = '<div class="info-empty-admin">Belum ada info yang diposting.</div>'; return; }
-    var badgeMap = {
-      umum:   '<span class="iac-badge iac-badge-umum">📌 Umum</span>',
-      urgent: '<span class="iac-badge iac-badge-urgent">🚨 Urgent</span>',
-      info:   '<span class="iac-badge iac-badge-info">ℹ️ Info</span>',
-      event:  '<span class="iac-badge iac-badge-event">🎉 Event</span>',
-      dev:    '<span class="iac-badge iac-badge-dev">⚙️ Dev</span>'
-    };
-    el.innerHTML = '<div class="info-admin-list">' + infos.map(function(item) {
-      return '<div class="info-admin-card">' +
-        '<div class="iac-accent iac-' + item.type + '"></div>' +
-        '<div class="iac-body">' +
-          '<div class="iac-top"><div class="iac-title">' + esc(item.title) + '</div>' +
-          '<button class="iac-del" onclick="deleteInfo(\'' + item._id + '\')">🗑️ Hapus</button></div>' +
-          (item.photoUrl ? '<img src="' + esc(item.photoUrl) + '" style="width:100%;max-height:140px;object-fit:cover;border-radius:10px;margin-bottom:10px;border:1px solid rgba(240,98,146,0.2);" onerror="this.style.display=\'none\'"/>' : '') +
-          '<div class="iac-content">' + esc(item.content||'').replace(/\n/g,'<br>') + '</div>' +
-          '<div class="iac-meta">' + (badgeMap[item.type]||badgeMap.umum) + '<span class="iac-date">📅 ' + esc(item.date||'') + ' · ✍️ ' + esc(item.author||'Admin') + '</span></div>' +
-        '</div></div>';
-    }).join('') + '</div>';
-  }
-
-  // ===== TOAST =====
-  function showToast(msg) {
-    var t = document.getElementById('toast');
-    t.textContent = msg;
-    t.style.display = 'block';
-    clearTimeout(t._timer);
-    t._timer = setTimeout(function() { t.style.display = 'none'; }, 2500);
-  }
-
-  // ===== ESCAPE =====
-  function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-
-  // ===== BIND EVENTS =====
-  document.querySelector('.login-btn').addEventListener('click', doLogin);
-  document.getElementById('loginPass').addEventListener('keydown', function(e) { if (e.key === 'Enter') doLogin(); });
-  document.getElementById('loginUser').addEventListener('keydown', function(e) { if (e.key === 'Enter') doLogin(); });
-  document.querySelector('.logout-btn').addEventListener('click', doLogout);
-  document.getElementById('searchBox').addEventListener('input', renderTable);
-  var filterMap = {'Semua':'ALL','Owner':'OWNER','Admin':'ADMIN','Member':'MEMBER','Anomali':'ANOMALI','Dev':'DEV'};
-  document.querySelectorAll('.filter-btn').forEach(function(btn) {
-    var key = Object.keys(filterMap).find(function(k) { return btn.textContent.includes(k); });
-    if (key) btn.addEventListener('click', function() { setFilter(filterMap[key], btn); });
-  });
-  document.querySelectorAll('.itype-btn').forEach(function(btn) { btn.addEventListener('click', function() { pickInfoType(btn); }); });
-  document.querySelector('.add-info-btn').addEventListener('click', addInfo);
-  document.querySelector('#modalComment .modal-cancel').addEventListener('click', function() { closeModal('modalComment'); });
-  document.querySelector('#modalComment .modal-confirm').addEventListener('click', saveComment);
-  document.querySelector('#modalLabel .modal-cancel').addEventListener('click', function() { closeModal('modalLabel'); });
-  document.querySelector('#modalLabel .modal-confirm').addEventListener('click', saveLabel);
-  document.querySelectorAll('.label-opt').forEach(function(el) { el.addEventListener('click', function() { selectLabel(el); }); });
-  document.querySelector('#modalDelete .modal-cancel').addEventListener('click', function() { closeModal('modalDelete'); });
-  document.querySelector('#modalDelete .modal-confirm').addEventListener('click', confirmDelete);
-  document.querySelectorAll('.modal-overlay').forEach(function(m) { m.addEventListener('click', function(ev) { if (ev.target === m) m.classList.remove('show'); }); });
-</script>
-</body>
-</html>
+</body></html>
