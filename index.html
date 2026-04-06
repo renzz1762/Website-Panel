@@ -347,16 +347,16 @@
 <!-- ===== MAIN APP LOGIC ===== -->
 <script src="main.js"></script>
 
+<!-- ===== NOTIFICATION SYSTEM ===== -->
+<script src="notification.js"></script>
+
 <!-- ===== FIREBASE (module) ===== -->
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-  import {
-    getFirestore, collection, doc, addDoc, updateDoc, deleteDoc,
-    onSnapshot, query, orderBy, serverTimestamp
-  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-  import {
-    getMessaging, getToken, onMessage
-  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging.js";
+  import { initializeApp }   from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getFirestore, collection, doc, addDoc, updateDoc, deleteDoc, onSnapshot, query, orderBy, serverTimestamp }
+    from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { getMessaging, getToken, onMessage }
+    from "https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging.js";
 
   var firebaseConfig = {
     apiKey: "AIzaSyABbV5Ap3YcGxT6UYE4BVgPlTU63EVYArA",
@@ -368,289 +368,142 @@
     measurementId: "G-2W8LKDJGLC"
   };
 
-  var app = initializeApp(firebaseConfig);
-  var db  = getFirestore(app);
+  var app      = initializeApp(firebaseConfig);
+  var db       = getFirestore(app);
   var fbStatus = document.getElementById('fb-status');
   fbStatus.style.display = 'block';
 
-  // ===== FIRESTORE REALTIME =====
-  var introsRef   = collection(db, 'intros');
-  var introsQuery = query(introsRef, orderBy('createdAt', 'desc'));
+  var introsRef = collection(db, 'intros');
+  var infosRef  = collection(db, 'infos');
 
-  // Track known IDs supaya bisa bedain data baru vs lama
-  var _knownIntroIds = new Set();
-  var _firstIntroSnap = true;
+  // ===== REALTIME LISTENERS =====
+  var _firstIntroSnap = true, _knownIntroIds = new Set();
+  var _firstInfoSnap  = true, _knownInfoIds  = new Set();
 
-  onSnapshot(introsQuery, function(snapshot) {
-    window.intros = snapshot.docs.map(function(d) { return Object.assign({ _id: d.id }, d.data()); });
+  function _push(opts) {
+    // HP notif (Notification API)
+    if (Notification.permission === 'granted') {
+      try { new Notification(opts.title, { body: opts.body||'', icon:'/favicon.ico', tag: opts.tag||'gi-'+Date.now(), vibrate:[200,100,200], requireInteraction: opts.type==='urgent' }); } catch(_){}
+    }
+    // In-app bell notif
+    if (window.notifAdd) window.notifAdd(opts.title, opts.body||'', opts.type||'info');
+  }
+  window._sendPushNotif = _push;
+
+  onSnapshot(query(introsRef, orderBy('createdAt','desc')), function(snap) {
+    window.intros = snap.docs.map(function(d){ return Object.assign({_id:d.id}, d.data()); });
     fbStatus.style.display = 'none';
     if (document.getElementById('daftar').classList.contains('active')) renderCards();
+    if (_firstIntroSnap) { snap.docs.forEach(function(d){ _knownIntroIds.add(d.id); }); _firstIntroSnap=false; return; }
+    snap.docChanges().forEach(function(c) {
+      if (c.type==='added' && !_knownIntroIds.has(c.doc.id)) {
+        _knownIntroIds.add(c.doc.id);
+        var d = c.doc.data();
+        _push({ title:'💌 Intro Baru Masuk!', body:(d.nama||'Seseorang')+' dari '+(d.asal||'?')+' baru intro~ 🌸', tag:'intro-'+c.doc.id, type:'intro' });
+      }
+    });
+  }, function(e){ fbStatus.textContent='❌ Gagal konek database'; console.error(e); });
 
-    // Push notif: ada intro baru (skip snapshot pertama)
-    if (_firstIntroSnap) {
-      snapshot.docs.forEach(function(d) { _knownIntroIds.add(d.id); });
-      _firstIntroSnap = false;
-    } else {
-      snapshot.docChanges().forEach(function(change) {
-        if (change.type === 'added' && !_knownIntroIds.has(change.doc.id)) {
-          _knownIntroIds.add(change.doc.id);
-          var data = change.doc.data();
-          // Tampilkan push notif via Service Worker
-          _sendPushNotif({
-            title: '💌 Intro Baru Masuk!',
-            body: (data.nama || 'Seseorang') + ' dari ' + (data.asal || '?') + ' baru aja intro~ 🌸',
-            tag: 'intro-' + change.doc.id,
-            type: 'intro'
-          });
-        }
-      });
-    }
-  }, function(err) {
-    fbStatus.textContent = '❌ Gagal konek database';
-    console.error('Intros error:', err);
-  });
-
-  var infosRef   = collection(db, 'infos');
-  var infosQuery = query(infosRef, orderBy('createdAt', 'desc'));
-
-  var _knownInfoIds = new Set();
-  var _firstInfoSnap = true;
-
-  onSnapshot(infosQuery, function(snapshot) {
-    window.infos = snapshot.docs.map(function(d) { return Object.assign({ _id: d.id }, d.data()); });
+  onSnapshot(query(infosRef, orderBy('createdAt','desc')), function(snap) {
+    window.infos = snap.docs.map(function(d){ return Object.assign({_id:d.id}, d.data()); });
     if (document.getElementById('info').classList.contains('active')) renderInfoPage();
-    if (window.daftarTab === 'info') renderInfoInDaftar();
+    if (window.daftarTab==='info') renderInfoInDaftar();
+    if (_firstInfoSnap) { snap.docs.forEach(function(d){ _knownInfoIds.add(d.id); }); _firstInfoSnap=false; return; }
+    snap.docChanges().forEach(function(c) {
+      if (c.type==='added' && !_knownInfoIds.has(c.doc.id)) {
+        _knownInfoIds.add(c.doc.id);
+        var d = c.doc.data();
+        var icon = {umum:'📌',urgent:'🚨',info:'ℹ️',event:'🎉',dev:'⚙️'}[d.type]||'📢';
+        _push({ title:icon+' '+(d.title||'Info Baru'), body:(d.content||'').substring(0,100), tag:'info-'+c.doc.id, type:d.type||'info' });
+      }
+    });
+  }, function(e){ console.error(e); });
 
-    if (_firstInfoSnap) {
-      snapshot.docs.forEach(function(d) { _knownInfoIds.add(d.id); });
-      _firstInfoSnap = false;
-    } else {
-      snapshot.docChanges().forEach(function(change) {
-        if (change.type === 'added' && !_knownInfoIds.has(change.doc.id)) {
-          _knownInfoIds.add(change.doc.id);
-          var data = change.doc.data();
-          var icon = { umum:'📌', urgent:'🚨', info:'ℹ️', event:'🎉', dev:'⚙️' }[data.type] || '📢';
-          _sendPushNotif({
-            title: icon + ' ' + (data.title || 'Info Baru'),
-            body: (data.content || '').substring(0, 100),
-            tag: 'info-' + change.doc.id,
-            type: data.type || 'info'
-          });
-        }
-      });
-    }
-  }, function(err) {
-    console.error('Infos error:', err);
-  });
-
-  // ===== FIREBASE ADMIN HELPERS =====
-  window._fbAdminUpdate = async function(col, id, data) {
-    await updateDoc(doc(db, col, id), data);
-  };
-  window._fbAdminDelete = async function(col, id) {
-    await deleteDoc(doc(db, col, id));
-  };
-  window._fbAdminAdd = async function(col, data) {
-    var ref = await addDoc(collection(db, col), data);
-    return { name: ref.id };
-  };
+  // ===== ADMIN HELPERS =====
+  window._fbAdminUpdate = async function(col, id, data) { await updateDoc(doc(db,col,id), data); };
+  window._fbAdminDelete = async function(col, id) { await deleteDoc(doc(db,col,id)); };
+  window._fbAdminAdd    = async function(col, data) { var r = await addDoc(collection(db,col), data); return {name:r.id}; };
 
   // ===== SUBMIT INTRO =====
   window.fbSubmitIntro = async function(entry) {
     var btn = document.getElementById('submitBtn');
-    btn.disabled = true;
-    btn.textContent = '⏳ Mengirim...';
+    btn.disabled = true; btn.textContent = '⏳ Mengirim...';
     try {
       await addDoc(introsRef, {
-        nama: entry.nama, umur: entry.umur, asal: entry.asal,
-        gender: entry.gender, hobi: entry.hobi,
-        visual: entry.visual, label: entry.label,
+        nama:entry.nama, umur:entry.umur, asal:entry.asal,
+        gender:entry.gender, hobi:entry.hobi,
+        visual:entry.visual, label:entry.label,
         ts: new Date().toLocaleDateString('id-ID'),
         createdAt: serverTimestamp()
       });
       resetForm();
       document.getElementById('successPopup').classList.add('show');
-    } catch(err) {
-      console.error(err);
-      alert('❌ Gagal kirim intro. Coba lagi ya!');
-    } finally {
-      btn.disabled = false;
-      btn.textContent = '🌸 Kirim Intro Gue!';
-    }
+      if (window.notifAdd) window.notifAdd('🎉 Intro Terkirim!', 'Intro kamu dari '+entry.nama+' udah masuk 💕', 'intro');
+    } catch(err) { console.error(err); alert('❌ Gagal kirim intro. Coba lagi ya!'); }
+    finally { btn.disabled=false; btn.textContent='🌸 Kirim Intro Gue!'; }
   };
 
-  // ===== WEB PUSH NOTIFICATION SYSTEM =====
-
-  // VAPID KEY — ambil dari Firebase Console → Project Settings → Cloud Messaging → Web push certificates
+  // ===== PUSH NOTIFICATION INIT =====
   var VAPID_KEY = 'BPFvW6Zz47DnIsFlQFmFVqgZKbs5AkelW2JctbmJx2IOLVWqFFQ9GoFJL8lENonFmKvUhT-nLa0DSjXQ7GGO_JM';
+  var _msg = null, _swReg = null;
 
-  var _messaging = null;
-  var _swReg = null;
-  var _pushReady = false;
-
-  // Init: daftarkan Service Worker & minta izin notifikasi
   async function _initPush() {
     if (!('serviceWorker' in navigator) || !('Notification' in window)) return;
     try {
       _swReg = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-      console.log('[Push] SW registered');
-
-      _messaging = getMessaging(app);
-
-      // Foreground message handler — muncul notif browser walau tab aktif
-      onMessage(_messaging, function(payload) {
-        var n = payload.notification || {};
-        _showBrowserNotif(n.title || '🌸 GrupIntro', n.body || '', payload.data || {});
+      _msg   = getMessaging(app);
+      // Foreground FCM → in-app notif
+      onMessage(_msg, function(p) {
+        var n=p.notification||{}, d=p.data||{};
+        _push({ title:n.title||d.title||'🌸 GrupIntro', body:n.body||d.body||'', type:d.type||'info', tag:d.tag });
       });
-
-      // Cek / minta izin
+      // Expose buat notification.js
+      window.fbGetFCMToken = async function(vk) { return await getToken(_msg, {vapidKey:vk, serviceWorkerRegistration:_swReg}); };
+      // Init in-app bell system
+      if (window.initNotifications) window.initNotifications(_msg);
+      // Cek izin
       if (Notification.permission === 'granted') {
-        await _subscribeToken();
-        _pushReady = true;
+        _doSubscribe();
       } else if (Notification.permission === 'default') {
-        _showPermBanner();
+        _showBanner();
       }
-    } catch(e) {
-      console.warn('[Push] Init error:', e);
-    }
+    } catch(e) { console.warn('[Push]', e); if (window.initNotifications) window.initNotifications(null); }
   }
 
-  // Ambil & simpan FCM token ke Firestore
-  async function _subscribeToken() {
-    if (!_messaging || VAPID_KEY === 'GANTI_DENGAN_VAPID_KEY_KAMU') return;
+  async function _doSubscribe() {
+    if (!_msg) return;
     try {
-      var token = await getToken(_messaging, {
-        vapidKey: VAPID_KEY,
-        serviceWorkerRegistration: _swReg
-      });
+      var token = await getToken(_msg, {vapidKey:VAPID_KEY, serviceWorkerRegistration:_swReg});
       if (token) {
-        console.log('[Push] Token OK:', token.substring(0,20) + '...');
-        // Simpan token ke Firestore collection 'push_tokens'
-        // Admin bisa pakai ini untuk blast notif lewat Firebase Cloud Messaging
-        try {
-          await addDoc(collection(db, 'push_tokens'), {
-            token: token,
-            ua: navigator.userAgent.substring(0, 120),
-            savedAt: serverTimestamp()
-          });
-        } catch(_) {}
+        try { await addDoc(collection(db,'push_tokens'), {token:token, ua:navigator.userAgent.substring(0,100), savedAt:serverTimestamp()}); } catch(_){}
       }
-    } catch(e) {
-      console.warn('[Push] getToken error:', e);
-    }
+    } catch(e) { console.warn('[Push] token err:', e); }
   }
 
-  // Tampilkan notifikasi langsung via Notification API
-  function _showBrowserNotif(title, body, data) {
-    if (Notification.permission !== 'granted') return;
-    var options = {
-      body: body,
-      icon: '/favicon.ico',
-      badge: '/favicon.ico',
-      tag: data.tag || 'gi-' + Date.now(),
-      data: data,
-      vibrate: [200, 100, 200],
-      requireInteraction: data.type === 'urgent'
-    };
-    var notif = new Notification(title, options);
-    notif.onclick = function() {
-      window.focus();
-      notif.close();
-    };
-  }
-
-  // Kirim push notif (saat app terbuka = pakai Notification API langsung)
-  function _sendPushNotif(opts) {
-    _showBrowserNotif(opts.title, opts.body, { tag: opts.tag, type: opts.type });
-  }
-  window._sendPushNotif = _sendPushNotif;
-
-  // ===== BANNER MINTA IZIN NOTIFIKASI =====
-  function _showPermBanner() {
-    if (document.getElementById('gi-perm-banner')) return;
-    var banner = document.createElement('div');
-    banner.id = 'gi-perm-banner';
-    banner.innerHTML =
-      '<div class="gi-pb-inner">' +
-        '<span class="gi-pb-bell">🔔</span>' +
-        '<div class="gi-pb-text">' +
-          '<b>Aktifkan Notifikasi HP!</b>' +
-          '<span>Biar tau kalau ada intro baru & info dari admin 💕</span>' +
-        '</div>' +
-        '<button id="gi-pb-yes">Izinkan</button>' +
-        '<button id="gi-pb-no">Nanti</button>' +
-      '</div>';
-    document.body.appendChild(banner);
-
-    // CSS
+  function _showBanner() {
+    if (document.getElementById('gi-pb')) return;
+    var b = document.createElement('div'); b.id='gi-pb';
+    b.innerHTML = '<div class="gi-pb-inner"><span class="gi-pb-bell">🔔</span><div class="gi-pb-text"><b>Aktifkan Notifikasi!</b><span>Biar tau kalau ada intro baru & info dari admin 💕</span></div><button id="gi-pb-yes">Izinkan</button><button id="gi-pb-no">Nanti</button></div>';
     var s = document.createElement('style');
-    s.textContent = `
-#gi-perm-banner {
-  position:fixed;bottom:-110px;left:0;right:0;z-index:99999;
-  padding:0 12px 12px;
-  transition:bottom 0.4s cubic-bezier(0.34,1.2,0.64,1);
-}
-#gi-perm-banner.show { bottom:0; }
-.gi-pb-inner {
-  background:rgba(255,255,255,0.97);
-  backdrop-filter:blur(20px);
-  border:1.5px solid rgba(240,98,146,0.3);
-  border-radius:20px;
-  padding:14px 16px;
-  display:flex;align-items:center;gap:10px;
-  box-shadow:0 -4px 32px rgba(240,98,146,0.18);
-}
-.gi-pb-bell { font-size:1.8rem;flex-shrink:0; }
-.gi-pb-text { flex:1; }
-.gi-pb-text b { display:block;font-size:0.88rem;font-weight:900;color:#5a2a3a;margin-bottom:2px; }
-.gi-pb-text span { font-size:0.75rem;color:#c2708a; }
-#gi-pb-yes {
-  padding:9px 16px;border-radius:12px;border:none;
-  background:linear-gradient(135deg,#f06292,#ec407a);
-  color:#fff;font-weight:900;font-size:0.82rem;cursor:pointer;
-  box-shadow:0 3px 12px rgba(236,64,122,0.35);white-space:nowrap;
-  transition:all 0.2s;
-}
-#gi-pb-yes:hover { transform:translateY(-1px);box-shadow:0 5px 16px rgba(236,64,122,0.45); }
-#gi-pb-no {
-  padding:9px 12px;border-radius:12px;
-  border:1px solid rgba(240,98,146,0.25);background:transparent;
-  color:#c2708a;font-weight:700;font-size:0.82rem;cursor:pointer;
-  white-space:nowrap;transition:all 0.18s;
-}
-#gi-pb-no:hover { background:rgba(240,98,146,0.07); }
-@media(max-width:400px){
-  .gi-pb-inner{flex-wrap:wrap;}
-  .gi-pb-text{width:100%;}
-}
-    `;
+    s.textContent='#gi-pb{position:fixed;bottom:-110px;left:0;right:0;z-index:99999;padding:0 12px 12px;transition:bottom 0.4s cubic-bezier(0.34,1.2,0.64,1);}#gi-pb.show{bottom:0;}.gi-pb-inner{background:rgba(255,255,255,0.97);backdrop-filter:blur(20px);border:1.5px solid rgba(240,98,146,0.3);border-radius:20px;padding:14px 16px;display:flex;align-items:center;gap:10px;box-shadow:0 -4px 32px rgba(240,98,146,0.18);}.gi-pb-bell{font-size:1.8rem;flex-shrink:0;}.gi-pb-text{flex:1;}.gi-pb-text b{display:block;font-size:0.88rem;font-weight:900;color:#5a2a3a;margin-bottom:2px;}.gi-pb-text span{font-size:0.75rem;color:#c2708a;}#gi-pb-yes{padding:9px 16px;border-radius:12px;border:none;background:linear-gradient(135deg,#f06292,#ec407a);color:#fff;font-weight:900;font-size:0.82rem;cursor:pointer;box-shadow:0 3px 12px rgba(236,64,122,0.35);white-space:nowrap;}#gi-pb-no{padding:9px 12px;border-radius:12px;border:1px solid rgba(240,98,146,0.25);background:transparent;color:#c2708a;font-weight:700;font-size:0.82rem;cursor:pointer;white-space:nowrap;}';
     document.head.appendChild(s);
-
-    setTimeout(function() { banner.classList.add('show'); }, 300);
-
+    document.body.appendChild(b);
+    setTimeout(function(){ b.classList.add('show'); }, 400);
     document.getElementById('gi-pb-yes').onclick = async function() {
-      banner.classList.remove('show');
-      setTimeout(function() { banner.remove(); }, 500);
-      var perm = await Notification.requestPermission();
-      if (perm === 'granted') {
-        await _subscribeToken();
-        _pushReady = true;
-        // Test notif
-        _showBrowserNotif('🌸 Notifikasi Aktif!', 'Kamu bakal dapet notif kalau ada intro baru atau info dari admin 💕', { tag: 'welcome' });
-      }
+      b.classList.remove('show'); setTimeout(function(){ b.remove(); },500);
+      var p = await Notification.requestPermission();
+      if (p==='granted') { await _doSubscribe(); try{ new Notification('🌸 Notifikasi Aktif!',{body:'Kamu bakal dapet notif kalau ada intro baru & info admin 💕',icon:'/favicon.ico'}); }catch(_){} }
     };
     document.getElementById('gi-pb-no').onclick = function() {
-      banner.classList.remove('show');
-      setTimeout(function() { banner.remove(); }, 500);
-      localStorage.setItem('gi_push_declined', '1');
+      b.classList.remove('show'); setTimeout(function(){ b.remove(); },500);
+      localStorage.setItem('gi_push_no','1');
     };
   }
 
-  // Jalankan init push setelah halaman load
-  if (!localStorage.getItem('gi_push_declined')) {
-    window.addEventListener('load', _initPush);
-  }
-
+  window.addEventListener('load', function() {
+    if (!localStorage.getItem('gi_push_no')) _initPush();
+    else if (window.initNotifications) window.initNotifications(null);
+  });
 </script>
 
 </body>
