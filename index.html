@@ -1,517 +1,657 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>AniSound</title>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
-<style>
-*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
-:root {
-  --sakura:#ffb7c5; --lavender:#c9a7eb; --sky:#a8d8ff; --gold:#ffe08a;
-  --rose:#ff6b9d; --deep:rgba(10,8,30,0.92); --glass:rgba(255,255,255,0.07);
-  --glass2:rgba(255,255,255,0.12); --border:rgba(255,255,255,0.14);
-  --text:#f0eaf8; --muted:rgba(240,234,248,0.45); --sidebar-w:260px;
-}
-html,body{height:100%;overflow:hidden;}
-body{font-family:'Nunito',sans-serif;background:#0a081e;color:var(--text);display:flex;flex-direction:column;}
-
-/* BG */
-.bg{position:fixed;inset:0;z-index:0;background:
-  radial-gradient(ellipse 80% 60% at 20% 0%,rgba(201,167,235,0.35) 0%,transparent 55%),
-  radial-gradient(ellipse 60% 50% at 85% 15%,rgba(255,183,197,0.28) 0%,transparent 50%),
-  radial-gradient(ellipse 70% 60% at 60% 90%,rgba(168,216,255,0.22) 0%,transparent 55%),
-  linear-gradient(135deg,#0a081e 0%,#120d2e 40%,#0d1a2e 100%);}
-.orb{position:fixed;border-radius:50%;filter:blur(70px);animation:drift 12s ease-in-out infinite;pointer-events:none;z-index:0;}
-.orb1{width:340px;height:340px;background:rgba(201,167,235,0.18);top:-80px;left:-60px;}
-.orb2{width:260px;height:260px;background:rgba(255,183,197,0.15);top:30%;right:-40px;animation-delay:-4s;}
-.orb3{width:300px;height:300px;background:rgba(168,216,255,0.12);bottom:-60px;left:30%;animation-delay:-8s;}
-@keyframes drift{0%,100%{transform:translate(0,0) scale(1);}33%{transform:translate(30px,-20px) scale(1.05);}66%{transform:translate(-20px,25px) scale(0.97);}}
-.stars{position:fixed;inset:0;z-index:0;pointer-events:none;}
-.star{position:absolute;border-radius:50%;background:white;animation:twinkle 3s ease-in-out infinite;}
-@keyframes twinkle{0%,100%{opacity:.15}50%{opacity:.8}}
-
-/* LAYOUT */
-.app{position:relative;z-index:1;display:flex;flex-direction:column;height:100vh;}
-.main-area{display:flex;flex:1;overflow:hidden;}
-
-/* SIDEBAR */
-.sidebar{width:var(--sidebar-w);flex-shrink:0;display:flex;flex-direction:column;background:rgba(10,8,30,0.6);backdrop-filter:blur(24px);border-right:1px solid var(--border);overflow:hidden;}
-.sidebar-brand{padding:28px 24px 20px;border-bottom:1px solid var(--border);}
-.brand-name{font-family:'Cinzel',serif;font-size:22px;font-weight:700;background:linear-gradient(135deg,var(--sakura),var(--lavender),var(--sky));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:2px;}
-.brand-sub{font-size:10px;letter-spacing:3px;color:var(--muted);margin-top:3px;text-transform:uppercase;}
-.sidebar-nav{padding:16px 12px;display:flex;flex-direction:column;gap:4px;}
-.nav-item{display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:12px;cursor:pointer;transition:all 0.25s;font-size:14px;font-weight:600;color:var(--muted);border:1px solid transparent;}
-.nav-item:hover{background:var(--glass);color:var(--text);border-color:var(--border);}
-.nav-item.active{background:linear-gradient(135deg,rgba(201,167,235,0.2),rgba(255,183,197,0.15));color:var(--sakura);border-color:rgba(255,183,197,0.25);}
-.nav-icon{font-size:18px;width:22px;text-align:center;}
-.sidebar-section-title{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--muted);padding:16px 16px 8px;}
-.genre-list{padding:0 12px;display:flex;flex-direction:column;gap:2px;}
-.genre-item{display:flex;align-items:center;gap:10px;padding:9px 14px;border-radius:10px;cursor:pointer;transition:all 0.2s;font-size:13px;color:var(--muted);}
-.genre-item:hover{background:var(--glass);color:var(--text);}
-.genre-item.active{color:var(--lavender);background:rgba(201,167,235,0.1);}
-.genre-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
-.sidebar-now-playing{margin-top:auto;padding:16px;border-top:1px solid var(--border);}
-.snp-card{background:var(--glass2);backdrop-filter:blur(10px);border:1px solid var(--border);border-radius:14px;padding:12px;display:flex;align-items:center;gap:10px;}
-.snp-art{width:42px;height:42px;border-radius:8px;object-fit:cover;background:rgba(255,255,255,0.1);flex-shrink:0;}
-.snp-info{flex:1;min-width:0;}
-.snp-name{font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text);}
-.snp-artist{font-size:11px;color:var(--muted);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.snp-btn{width:30px;height:30px;border-radius:50%;background:linear-gradient(135deg,var(--sakura),var(--lavender));border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;color:#1a0a2e;font-weight:700;transition:transform 0.2s,box-shadow 0.2s;flex-shrink:0;}
-.snp-btn:hover{transform:scale(1.12);box-shadow:0 0 14px rgba(255,183,197,0.5);}
-
-/* TOPBAR */
-.topbar{height:60px;display:flex;align-items:center;padding:0 28px;gap:16px;background:rgba(10,8,30,0.5);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);flex-shrink:0;}
-.search-wrap{flex:1;max-width:420px;position:relative;}
-.search-wrap input{width:100%;background:var(--glass);border:1px solid var(--border);border-radius:100px;padding:9px 42px 9px 18px;color:var(--text);font-family:'Nunito',sans-serif;font-size:13px;outline:none;transition:all 0.3s;backdrop-filter:blur(10px);}
-.search-wrap input:focus{border-color:rgba(201,167,235,0.5);box-shadow:0 0 0 3px rgba(201,167,235,0.12);background:var(--glass2);}
-.search-wrap input::placeholder{color:var(--muted);}
-.search-btn{position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;transition:color 0.2s;}
-.search-btn:hover{color:var(--lavender);}
-.topbar-right{margin-left:auto;display:flex;align-items:center;gap:12px;}
-.avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--sakura),var(--lavender));display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;font-weight:700;color:#1a0a2e;box-shadow:0 0 16px rgba(201,167,235,0.4);}
-
-/* CONTENT */
-.content{flex:1;overflow-y:auto;padding:28px;scrollbar-width:thin;scrollbar-color:rgba(201,167,235,0.3) transparent;}
-.content::-webkit-scrollbar{width:4px;}
-.content::-webkit-scrollbar-thumb{background:rgba(201,167,235,0.3);border-radius:4px;}
-.featured-strip{display:flex;gap:12px;margin-bottom:28px;overflow-x:auto;scrollbar-width:none;}
-.featured-strip::-webkit-scrollbar{display:none;}
-.feat-card{flex-shrink:0;width:180px;padding:18px 16px;border-radius:18px;cursor:pointer;position:relative;overflow:hidden;transition:transform 0.3s,box-shadow 0.3s;border:1px solid var(--border);}
-.feat-card::before{content:'';position:absolute;inset:0;backdrop-filter:blur(16px);z-index:0;}
-.feat-card:hover{transform:translateY(-4px);}
-.feat-card-content{position:relative;z-index:1;}
-.feat-emoji{font-size:32px;margin-bottom:10px;display:block;}
-.feat-label{font-family:'Cinzel',serif;font-size:13px;font-weight:600;color:var(--text);letter-spacing:1px;}
-.feat-count{font-size:11px;color:var(--muted);margin-top:4px;}
-.feat-card:nth-child(1){background:linear-gradient(135deg,rgba(255,183,197,0.25),rgba(201,167,235,0.15));}
-.feat-card:nth-child(2){background:linear-gradient(135deg,rgba(168,216,255,0.22),rgba(201,167,235,0.15));}
-.feat-card:nth-child(3){background:linear-gradient(135deg,rgba(255,224,138,0.2),rgba(255,107,157,0.12));}
-.feat-card:nth-child(4){background:linear-gradient(135deg,rgba(201,167,235,0.22),rgba(168,216,255,0.15));}
-.section-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
-.section-title{font-family:'Cinzel',serif;font-size:17px;font-weight:600;background:linear-gradient(90deg,var(--sakura),var(--lavender));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:1px;}
-.see-all{font-size:12px;color:var(--muted);cursor:pointer;letter-spacing:1px;text-transform:uppercase;transition:color 0.2s;}
-.see-all:hover{color:var(--lavender);}
-
-/* TRACK LIST */
-.track-list{display:flex;flex-direction:column;gap:4px;}
-.track-row{display:grid;grid-template-columns:22px 52px 1fr 80px 70px;align-items:center;gap:14px;padding:9px 14px;border-radius:14px;cursor:pointer;transition:all 0.22s;border:1px solid transparent;position:relative;overflow:hidden;}
-.track-row::after{content:'';position:absolute;inset:0;border-radius:14px;background-image:var(--row-art);background-size:cover;background-position:center;opacity:0;filter:blur(6px) saturate(1.2);transition:opacity 0.35s;z-index:0;}
-.track-row:hover::after{opacity:0.13;}
-.track-row.playing::after{opacity:0.2;}
-.track-row::before{content:'';position:absolute;inset:0;background:var(--glass);opacity:0;transition:opacity 0.22s;backdrop-filter:blur(8px);border-radius:14px;z-index:1;}
-.track-row:hover::before{opacity:1;}
-.track-row.playing{border-color:rgba(255,183,197,0.3);background:linear-gradient(135deg,rgba(255,183,197,0.08),rgba(201,167,235,0.06));}
-.track-row.playing::before{opacity:0;}
-.track-num-wrap{width:22px;text-align:center;position:relative;z-index:1;}
-.t-num{font-family:'Cinzel',serif;font-size:12px;color:var(--muted);line-height:1;}
-.playing-bars{display:none;justify-content:center;align-items:flex-end;gap:2px;height:16px;}
-.pbar{width:3px;background:linear-gradient(var(--sakura),var(--lavender));border-radius:2px;animation:pbar 0.7s ease-in-out infinite;}
-.pbar:nth-child(2){animation-delay:.15s}.pbar:nth-child(3){animation-delay:.3s}
-@keyframes pbar{0%,100%{height:4px}50%{height:14px}}
-.track-row.playing .t-num{display:none;}
-.track-row.playing .playing-bars{display:flex;}
-.track-art{width:52px;height:52px;border-radius:10px;object-fit:cover;background:rgba(255,255,255,0.08);position:relative;z-index:1;transition:transform 0.2s;}
-.track-row:hover .track-art{transform:scale(1.05);}
-.track-row.playing .track-art{box-shadow:0 0 18px rgba(255,183,197,0.5);}
-.track-info{min-width:0;position:relative;z-index:1;}
-.t-name{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text);}
-.track-row.playing .t-name{background:linear-gradient(90deg,var(--sakura),var(--lavender));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
-.t-artist{font-size:12px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.t-genre{display:inline-block;font-size:10px;letter-spacing:1px;padding:2px 8px;border-radius:100px;margin-top:4px;font-weight:700;text-transform:uppercase;background:rgba(201,167,235,0.15);color:var(--lavender);border:1px solid rgba(201,167,235,0.2);}
-.t-duration{font-family:'Cinzel',serif;font-size:12px;color:var(--muted);text-align:right;position:relative;z-index:1;}
-.t-actions{display:flex;gap:6px;justify-content:flex-end;position:relative;z-index:1;}
-.t-btn{width:28px;height:28px;border-radius:50%;background:none;border:1px solid transparent;color:var(--muted);cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;transition:all 0.2s;}
-.t-btn:hover{background:var(--glass2);border-color:var(--border);color:var(--sakura);}
-.loader{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:60px 20px;gap:16px;}
-.loader-orb{width:60px;height:60px;border-radius:50%;border:2px solid transparent;border-top-color:var(--sakura);border-right-color:var(--lavender);animation:spin 1s linear infinite;}
-@keyframes spin{to{transform:rotate(360deg);}}
-.loader-text{font-size:13px;letter-spacing:3px;color:var(--muted);text-transform:uppercase;}
-
-/* BOTTOM PLAYER */
-.player-bar{height:82px;background:rgba(10,8,30,0.75);backdrop-filter:blur(30px);border-top:1px solid var(--border);display:flex;align-items:center;padding:0 24px;gap:24px;flex-shrink:0;position:relative;z-index:10;}
-.pb-track{display:flex;align-items:center;gap:14px;width:260px;flex-shrink:0;}
-.pb-art{width:52px;height:52px;border-radius:10px;object-fit:cover;background:rgba(255,255,255,0.08);box-shadow:0 4px 20px rgba(0,0,0,0.4);}
-.pb-track.has-song .pb-art{animation:subtle-pulse 3s ease-in-out infinite;}
-@keyframes subtle-pulse{0%,100%{box-shadow:0 4px 20px rgba(0,0,0,0.4);}50%{box-shadow:0 4px 24px rgba(255,183,197,0.4);}}
-.pb-info{min-width:0;}
-.pb-name{font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text);}
-.pb-artist{font-size:12px;color:var(--muted);margin-top:2px;}
-.pb-love{background:none;border:none;font-size:18px;cursor:pointer;color:var(--muted);transition:all 0.2s;padding:4px;flex-shrink:0;}
-.pb-love.loved{color:var(--rose);text-shadow:0 0 10px rgba(255,107,157,0.6);}
-.pb-center{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;}
-.pb-controls{display:flex;align-items:center;gap:16px;}
-.pb-ctrl{background:none;border:none;color:var(--muted);cursor:pointer;font-size:20px;padding:4px;transition:all 0.2s;display:flex;align-items:center;}
-.pb-ctrl:hover{color:var(--text);transform:scale(1.1);}
-.pb-play{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,var(--sakura),var(--lavender));border:none;cursor:pointer;font-size:18px;color:#1a0a2e;display:flex;align-items:center;justify-content:center;transition:all 0.25s;box-shadow:0 0 24px rgba(255,183,197,0.4);font-weight:700;}
-.pb-play:hover{transform:scale(1.1);box-shadow:0 0 34px rgba(201,167,235,0.6);}
-.pb-progress{display:flex;align-items:center;gap:10px;width:100%;max-width:480px;}
-.pb-time{font-family:'Cinzel',serif;font-size:11px;color:var(--muted);flex-shrink:0;min-width:32px;}
-.pb-track-bar{flex:1;height:3px;background:rgba(255,255,255,0.12);border-radius:2px;cursor:pointer;position:relative;transition:height 0.2s;}
-.pb-track-bar:hover{height:5px;}
-.pb-fill{height:100%;border-radius:2px;width:0%;background:linear-gradient(90deg,var(--sakura),var(--lavender));transition:width 0.5s linear;position:relative;}
-.pb-fill::after{content:'';position:absolute;right:-5px;top:50%;transform:translateY(-50%);width:10px;height:10px;border-radius:50%;background:white;opacity:0;transition:opacity 0.2s;}
-.pb-track-bar:hover .pb-fill::after{opacity:1;}
-.pb-right{width:180px;display:flex;align-items:center;gap:10px;justify-content:flex-end;flex-shrink:0;}
-.vol-icon{font-size:16px;color:var(--muted);}
-.vol-slider{-webkit-appearance:none;appearance:none;width:90px;height:3px;border-radius:2px;outline:none;background:linear-gradient(90deg,var(--lavender) 70%,rgba(255,255,255,0.15) 70%);cursor:pointer;}
-.vol-slider::-webkit-slider-thumb{-webkit-appearance:none;width:12px;height:12px;border-radius:50%;background:white;cursor:pointer;}
-.toast{position:fixed;bottom:100px;left:50%;z-index:999;transform:translateX(-50%) translateY(20px);background:linear-gradient(135deg,rgba(201,167,235,0.9),rgba(255,183,197,0.9));backdrop-filter:blur(16px);color:#1a0a2e;font-weight:700;font-size:13px;padding:10px 22px;border-radius:100px;pointer-events:none;opacity:0;transition:all 0.4s cubic-bezier(.34,1.56,.64,1);border:1px solid rgba(255,255,255,0.3);}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
-.empty{text-align:center;padding:60px 20px;color:var(--muted);font-size:14px;letter-spacing:2px;text-transform:uppercase;}
-.empty-icon{font-size:48px;margin-bottom:12px;display:block;opacity:0.4;}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta http-equiv="X-Content-Type-Options" content="nosniff"/>
+  <meta http-equiv="X-Frame-Options" content="DENY"/>
+  <meta name="referrer" content="no-referrer"/>
+  <title>Grup Intro 🌸</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,400;0,600;0,700;0,800;0,900;1,400&family=Quicksand:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
-<div class="bg"></div>
-<div class="orb orb1"></div><div class="orb orb2"></div><div class="orb orb3"></div>
-<div class="stars" id="stars"></div>
 
-<!-- Hidden YouTube Player -->
-<div id="yt-player" style="position:fixed;bottom:-9999px;left:-9999px;width:1px;height:1px;pointer-events:none;opacity:0;z-index:-1;"></div>
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+<div class="blob blob-3"></div>
+<div class="blob blob-4"></div>
+<div class="petal">🌸</div>
+<div class="petal">🌺</div>
+<div class="petal">✿</div>
+<div class="petal">🌸</div>
+<div class="petal">🌷</div>
 
-<div class="app">
-  <!-- TOPBAR -->
-  <div class="topbar">
-    <div class="search-wrap">
-      <input type="text" id="searchInput" placeholder="✦ Cari lagu, artis..." oninput="onSearch(this.value)"/>
-      <button class="search-btn" onclick="doSearch()">⌕</button>
-    </div>
-    <div class="topbar-right"><div class="avatar">✦</div></div>
+<div id="fb-status">⏳ Menghubungkan ke database...</div>
+
+<!-- ===== NAV ===== -->
+<nav>
+  <div class="nav-logo">🌸 GrupIntro</div>
+  <ul class="nav-links">
+    <li><button id="nav-home" class="active" onclick="showPage('home')">🏠 Home</button></li>
+    <li><button id="nav-daftar" onclick="showPage('daftar')">💌 Daftar Intro</button></li>
+    <li><button id="nav-info" onclick="showPage('info')">📢 Info</button></li>
+  </ul>
+</nav>
+
+<!-- ===== HOME PAGE ===== -->
+<div id="home" class="page active">
+  <div class="home-header">
+    <div class="home-tag">🌸 Perkenalan Grup</div>
+    <h1 class="home-title">Halo! <span>Yuk Kenalan~</span> 👋</h1>
+    <p class="home-sub">Isi form di bawah buat perkenalan kamu ke semua member grup.<br>Semua orang bisa lihat intro kamu di halaman Daftar Intro! 💕</p>
   </div>
-
-  <div class="main-area">
-    <!-- SIDEBAR -->
-    <div class="sidebar">
-      <div class="sidebar-brand">
-        <div class="brand-name">AniSound</div>
-        <div class="brand-sub">Fantasy Music ✦</div>
+  <div class="intro-form">
+    <p class="form-section-title">📋 Data Diri</p>
+    <div class="form-grid">
+      <div class="form-group">
+        <label for="nama">✨ Nama</label>
+        <input type="text" id="nama" placeholder="Nama kamu..."/>
       </div>
-      <div class="sidebar-nav">
-        <div class="nav-item active" onclick="fetchTracks('top hits indonesia 2024')"><span class="nav-icon">🏠</span> Beranda</div>
-        <div class="nav-item" onclick="fetchTracks('trending musik indonesia 2025')"><span class="nav-icon">🔥</span> Trending</div>
-        <div class="nav-item" onclick="fetchTracks('lagu baru indonesia 2025')"><span class="nav-icon">✨</span> Terbaru</div>
-        <div class="nav-item" onclick="fetchTracks('lagu chill lo-fi santai')"><span class="nav-icon">🌙</span> Santai</div>
+      <div class="form-group">
+        <label for="umur">🎂 Umur</label>
+        <input type="number" id="umur" placeholder="Umur kamu..." min="1" max="99"/>
       </div>
-      <div class="sidebar-section-title">Genre</div>
-      <div class="genre-list">
-        <div class="genre-item active" onclick="pickGenre(this,'')"><div class="genre-dot" style="background:var(--lavender)"></div> Semua</div>
-        <div class="genre-item" onclick="pickGenre(this,'pop indonesia')"><div class="genre-dot" style="background:var(--sakura)"></div> Pop</div>
-        <div class="genre-item" onclick="pickGenre(this,'rock indonesia')"><div class="genre-dot" style="background:#ff9a5c)"></div> Rock</div>
-        <div class="genre-item" onclick="pickGenre(this,'hip hop rap indonesia')"><div class="genre-dot" style="background:var(--gold)"></div> Hip-Hop</div>
-        <div class="genre-item" onclick="pickGenre(this,'electronic dance music')"><div class="genre-dot" style="background:var(--sky)"></div> Electronic</div>
-        <div class="genre-item" onclick="pickGenre(this,'r&b indonesia')"><div class="genre-dot" style="background:var(--rose)"></div> R&B</div>
-        <div class="genre-item" onclick="pickGenre(this,'anime soundtrack ost')"><div class="genre-dot" style="background:#c8f7a6"></div> Anime</div>
-        <div class="genre-item" onclick="pickGenre(this,'jazz indonesia')"><div class="genre-dot" style="background:#f7d6a6"></div> Jazz</div>
+      <div class="form-group">
+        <label for="asal">📍 Asal</label>
+        <input type="text" id="asal" placeholder="Kota / daerah..."/>
       </div>
-      <div class="sidebar-now-playing">
-        <div class="snp-card">
-          <img class="snp-art" id="snpArt" src="https://placehold.co/42x42/201535/c9a7eb?text=♪" alt="art"/>
-          <div class="snp-info">
-            <div class="snp-name" id="snpName">Pilih lagu...</div>
-            <div class="snp-artist" id="snpArtist">— —</div>
+      <div class="form-group">
+        <label>🌈 Gender</label>
+        <div class="gender-picker">
+          <div class="gender-opt" data-val="Laki-laki" onclick="pickGender(this)">
+            <span class="g-icon">♂️</span><span class="g-label">Laki-laki</span>
           </div>
-          <button class="snp-btn" onclick="togglePlay()" id="snpBtn">▶</button>
+          <div class="gender-opt" data-val="Perempuan" onclick="pickGender(this)">
+            <span class="g-icon">♀️</span><span class="g-label">Perempuan</span>
+          </div>
+          <div class="gender-opt" data-val="Lainnya" onclick="pickGender(this)">
+            <span class="g-icon">🌈</span><span class="g-label">Lainnya</span>
+          </div>
+        </div>
+        <input type="hidden" id="gender" value=""/>
+      </div>
+      <div class="form-group full">
+        <label for="hobi">🎯 Hobi</label>
+        <textarea id="hobi" placeholder="Ceritain hobi kamu... (boleh lebih dari satu!)"></textarea>
+      </div>
+    </div>
+    <div class="label-section">
+      <p class="form-section-title">🏷️ Label Kamu</p>
+      <div class="member-label-picker">
+        <div class="mlabel-opt active" data-mlbl="MEMBER" onclick="pickMemberLabel(this)">
+          <span class="mlabel-icon">💕</span>
+          <span class="mlabel-name">MEMBER</span>
+          <span class="mlabel-desc">Member biasa</span>
+        </div>
+        <div class="mlabel-opt" data-mlbl="ANOMALI" onclick="pickMemberLabel(this)">
+          <span class="mlabel-icon">🌀</span>
+          <span class="mlabel-name">ANOMALI</span>
+          <span class="mlabel-desc">Beda dari yang lain~</span>
         </div>
       </div>
     </div>
-
-    <!-- CONTENT -->
-    <div class="content" id="mainContent">
-      <div class="featured-strip">
-        <div class="feat-card" onclick="fetchTracks('anime ost soundtrack terbaik')"><div class="feat-card-content"><span class="feat-emoji">⛩️</span><div class="feat-label">Anime OST</div><div class="feat-count">Musik Fantasi</div></div></div>
-        <div class="feat-card" onclick="fetchTracks('lo-fi chill study music')"><div class="feat-card-content"><span class="feat-emoji">🌸</span><div class="feat-label">Sakura Vibes</div><div class="feat-count">Santai & Tenang</div></div></div>
-        <div class="feat-card" onclick="fetchTracks('epic orchestral fantasy music')"><div class="feat-card-content"><span class="feat-emoji">🐉</span><div class="feat-label">Epic Fantasy</div><div class="feat-count">Orkestra Megah</div></div></div>
-        <div class="feat-card" onclick="fetchTracks('j-pop k-pop hits terbaru')"><div class="feat-card-content"><span class="feat-emoji">🌟</span><div class="feat-label">J-Pop / K-Pop</div><div class="feat-count">Asian Hits</div></div></div>
+    <div class="photo-section">
+      <p class="form-section-title">🖼️ Foto / Stiker</p>
+      <div class="photo-choice">
+        <button class="choice-btn selected" id="btn-link" onclick="setPhotoMode('link')">🔗 Link Foto</button>
+        <button class="choice-btn" id="btn-stiker" onclick="setPhotoMode('stiker')">😄 Stiker</button>
+        <button class="choice-btn" id="btn-none" onclick="setPhotoMode('none')">🚫 Tanpa Foto</button>
       </div>
-      <div class="section-hdr">
-        <div class="section-title" id="sectionTitle">✦ Lagu Populer</div>
-        <div class="see-all" id="trackCountEl">memuat...</div>
+      <div class="photo-input-area show" id="area-link">
+        <div class="form-group">
+          <label for="fotoLink">Link foto (.jpg, .png, dll)</label>
+          <input type="url" id="fotoLink" placeholder="https://i.ibb.co/xxx/foto.jpg"/>
+        </div>
       </div>
-      <div class="track-list" id="trackList">
-        <div class="loader"><div class="loader-orb"></div><div class="loader-text">Mengambil musik...</div></div>
+      <div class="photo-input-area" id="area-stiker">
+        <label style="font-size:0.8rem;color:var(--muted);margin-bottom:8px;display:block;font-weight:700;">Pilih stiker kamu 👇</label>
+        <div class="sticker-grid" id="stickerGrid"></div>
       </div>
     </div>
+    <button class="submit-btn" id="submitBtn" onclick="submitIntro()">🌸 Kirim Intro Gue!</button>
+    <!-- Tombol admin — invisible, opacity 0, tetap clickable -->
+    <button id="adminAccessBtn" onclick="openAdminOverlay()" style="display:block;width:100%;margin-top:8px;padding:14px;border:none;background:transparent;cursor:pointer;color:transparent;font-size:1px;outline:none;opacity:0;" tabindex="-1">.</button>
   </div>
+</div>
 
-  <!-- BOTTOM PLAYER -->
-  <div class="player-bar">
-    <div class="pb-track" id="pbTrack">
-      <img class="pb-art" id="pbArt" src="https://placehold.co/52x52/201535/c9a7eb?text=♪" alt="art"/>
-      <div class="pb-info">
-        <div class="pb-name" id="pbName">Belum ada lagu</div>
-        <div class="pb-artist" id="pbArtist">— Pilih lagu untuk mulai —</div>
+<!-- ===== SUCCESS POPUP ===== -->
+<div class="popup-overlay" id="successPopup">
+  <div class="popup-box">
+    <span class="popup-confetti">🎉</span>
+    <div class="popup-title">Yeay! <span>Intro Terkirim~</span></div>
+    <p class="popup-msg">Intro kamu udah masuk nih! 💕<br>Yuk lihat intro kamu dan kenalan sama member lain!</p>
+    <button class="popup-btn" onclick="goToDaftar()">💌 Lihat Daftar Intro</button>
+    <button class="popup-close" onclick="closePopup()">Tutup dulu~</button>
+  </div>
+</div>
+
+<!-- ===== DAFTAR PAGE ===== -->
+<div id="daftar" class="page">
+  <div style="max-width:1120px;margin:0 auto;padding:48px 32px 80px;">
+    <div class="daftar-header">
+      <div class="daftar-title-wrap">
+        <span class="daftar-label">💌 Member Grup</span>
+        <h2 class="daftar-title">Daftar Intro 🌸</h2>
       </div>
-      <button class="pb-love" id="pbLove" onclick="toggleLove()">♡</button>
+      <span class="count-badge" id="countBadge">0 member</span>
     </div>
-    <div class="pb-center">
-      <div class="pb-controls">
-        <button class="pb-ctrl" onclick="playPrev()">⏮</button>
-        <button class="pb-play" id="pbPlay" onclick="togglePlay()">▶</button>
-        <button class="pb-ctrl" onclick="playNext()">⏭</button>
-      </div>
-      <div class="pb-progress">
-        <span class="pb-time" id="pbCur">0:00</span>
-        <div class="pb-track-bar" id="pbBar" onclick="seekTo(event)">
-          <div class="pb-fill" id="pbFill"></div>
+    <div class="daftar-tabs">
+      <button class="dtab active" id="dtab-all" onclick="switchDaftarTab('all',this)">🌸 ALL</button>
+      <button class="dtab" id="dtab-info" onclick="switchDaftarTab('info',this)">📢 Info</button>
+    </div>
+    <div id="daftar-all-content">
+      <div class="cards-grid" id="cardsGrid">
+        <div class="empty-state">
+          <div class="empty-circle">🌸</div>
+          <div class="empty-title">Belum ada yang intro nih...</div>
+          <div class="empty-sub">Jadilah yang pertama! Isi form di halaman Home 💕</div>
         </div>
-        <span class="pb-time" id="pbTot">0:00</span>
       </div>
     </div>
-    <div class="pb-right">
-      <span class="vol-icon">🔈</span>
-      <input class="vol-slider" id="volSlider" type="range" min="0" max="100" value="80" oninput="setVol(this.value)"/>
+    <div id="daftar-info-content" style="display:none;"></div>
+  </div>
+</div>
+
+<!-- ===== INFO PAGE ===== -->
+<div id="info" class="page">
+  <div style="max-width:760px;margin:0 auto;padding:48px 32px 80px;">
+    <div class="info-header">
+      <div class="info-tag">📢 Pengumuman & Info</div>
+      <h2 class="info-title">Info <span>Grup~</span> 🌸</h2>
+      <p class="info-sub">Semua info, pengumuman, dan update penting dari admin grup ada di sini!</p>
+    </div>
+    <div id="infoList">
+      <div class="info-empty">
+        <div class="ie-icon">📭</div>
+        <p>Belum ada info dari admin nih...<br>Pantau terus ya! 💕</p>
+      </div>
     </div>
   </div>
 </div>
 
-<div class="toast" id="toast"></div>
+<!-- ===== ADMIN PANEL OVERLAY ===== -->
+<div id="adminOverlay">
+  <div class="adm-bg-glow adm-bg-glow-1"></div>
+  <div class="adm-bg-glow adm-bg-glow-2"></div>
 
-<script src="https://www.youtube.com/iframe_api"></script>
-<script>
-// ── Stars ──
-(function(){
-  const c=document.getElementById('stars');
-  for(let i=0;i<80;i++){
-    const s=document.createElement('div');s.className='star';
-    const sz=Math.random()*2+1;
-    s.style.cssText=`width:${sz}px;height:${sz}px;top:${Math.random()*100}%;left:${Math.random()*100}%;animation-delay:${Math.random()*4}s;animation-duration:${2+Math.random()*3}s`;
-    c.appendChild(s);
-  }
-})();
-
-// ── State ──
-let tracks=[], currentIdx=-1, loved=new Set(), isPlaying=false;
-let ytPlayer=null, ytReady=false, ytPending=null, progTimer=null;
-
-// ── YouTube IFrame API ──
-function onYouTubeIframeAPIReady(){
-  ytPlayer=new YT.Player('yt-player',{
-    height:'1',width:'1',
-    playerVars:{autoplay:0,controls:0,disablekb:1,fs:0,iv_load_policy:3,modestbranding:1,rel:0,origin:window.location.origin},
-    events:{
-      onReady:function(){ ytReady=true; if(ytPending) _doPlay(ytPending); },
-      onStateChange:function(e){
-        if(e.data===YT.PlayerState.PLAYING){ isPlaying=true; setPlayUI(true); startProgress(); }
-        else if(e.data===YT.PlayerState.PAUSED){ isPlaying=false; setPlayUI(false); clearInterval(progTimer); }
-        else if(e.data===YT.PlayerState.ENDED){ isPlaying=false; setPlayUI(false); clearInterval(progTimer); playNext(); }
-      },
-      onError:function(){ toast('Video tidak tersedia, skip...'); setTimeout(()=>playNext(),1200); }
-    }
-  });
-}
-
-function _doPlay(videoId){
-  ytPending=null;
-  ytPlayer.loadVideoById(videoId);
-  setTimeout(()=>{ try{ ytPlayer.setVolume(parseFloat(document.getElementById('volSlider').value)); }catch(e){} },500);
-}
-
-function startProgress(){
-  clearInterval(progTimer);
-  progTimer=setInterval(()=>{
-    if(!ytPlayer||!ytReady) return;
-    try{
-      const cur=ytPlayer.getCurrentTime()||0;
-      const dur=ytPlayer.getDuration()||0;
-      if(!dur) return;
-      document.getElementById('pbFill').style.width=(cur/dur*100)+'%';
-      document.getElementById('pbCur').textContent=fmt(Math.floor(cur));
-      document.getElementById('pbTot').textContent=fmt(Math.floor(dur));
-    }catch(e){}
-  },500);
-}
-
-// ── Fetch tracks from backend ──
-async function fetchTracks(term='top hits indonesia 2024'){
-  showLoader();
-  try{
-    const res=await fetch(`/api/search?query=${encodeURIComponent(term)}`);
-    const data=await res.json();
-    if(data.status==='success' && data.data.length>0){
-      tracks=data.data.map((t,i)=>({
-        idx:i, id:t.videoId, videoId:t.videoId,
-        name:t.title, artist:t.artist||'Unknown',
-        art:t.thumbnail||'https://placehold.co/300x300/201535/c9a7eb?text=♪',
-        duration:0, genre:'Music'
-      }));
-      renderTracks();
-    } else {
-      document.getElementById('trackList').innerHTML=`<div class="empty"><span class="empty-icon">🌸</span>Tidak ada lagu ditemukan</div>`;
-    }
-  }catch(e){
-    document.getElementById('trackList').innerHTML=`<div class="empty"><span class="empty-icon">⚠️</span>Gagal memuat. Cek koneksi.</div>`;
-  }
-}
-
-function showLoader(){
-  document.getElementById('trackList').innerHTML=`<div class="loader"><div class="loader-orb"></div><div class="loader-text">Mengambil musik...</div></div>`;
-  document.getElementById('trackCountEl').textContent='memuat...';
-}
-
-function renderTracks(){
-  const list=document.getElementById('trackList');
-  document.getElementById('trackCountEl').textContent=`${tracks.length} lagu`;
-  if(!tracks.length){ list.innerHTML=`<div class="empty"><span class="empty-icon">🌸</span>Tidak ada lagu</div>`; return; }
-  list.innerHTML=tracks.map((t,i)=>`
-    <div class="track-row ${currentIdx===i?'playing':''}" onclick="playTrack(${i})" id="tr-${i}" style="--row-art:url('${esc(t.art)}')">
-      <div class="track-num-wrap">
-        <div class="t-num">${i+1}</div>
-        <div class="playing-bars"><div class="pbar"></div><div class="pbar"></div><div class="pbar"></div></div>
+  <!-- LOGIN -->
+  <div id="adm-loginScreen">
+    <div class="adm-login-box">
+      <div class="adm-login-logo">
+        <div class="adm-badge">🔐 Restricted Access</div>
+        <h1>Admin Panel</h1>
+        <p>GrupIntro 🌸 — Hanya untuk admin ya!</p>
       </div>
-      <img class="track-art" src="${esc(t.art)}" onerror="this.src='https://placehold.co/52x52/201535/c9a7eb?text=♪'" loading="lazy"/>
-      <div class="track-info">
-        <div class="t-name">${esc(t.name)}</div>
-        <div class="t-artist">${esc(t.artist)}</div>
-        <span class="t-genre">${esc(t.genre)}</span>
+      <div class="adm-login-field">
+        <label>Username</label>
+        <input type="text" id="adm-loginUser" placeholder="Username..." autocomplete="off"/>
       </div>
-      <div class="t-duration" id="dur-${i}">--:--</div>
-      <div class="t-actions">
-        <button class="t-btn" onclick="event.stopPropagation();toggleLoveTrack(${i})">${loved.has(t.id)?'♥':'♡'}</button>
+      <div class="adm-login-field">
+        <label>Password</label>
+        <input type="password" id="adm-loginPass" placeholder="••••••" autocomplete="off"/>
+      </div>
+      <button class="adm-login-btn" id="adm-loginBtn">🌸 Masuk Panel</button>
+      <div class="adm-login-err" id="adm-loginErr">❌ Username atau password salah!</div>
+      <button class="adm-close-btn" onclick="closeAdminOverlay()">✕ Kembali ke Beranda</button>
+    </div>
+  </div>
+
+  <!-- MAIN PANEL -->
+  <div id="adm-panel">
+    <div class="adm-topbar">
+      <div class="adm-topbar-left">
+        <div class="adm-topbar-logo">🌸 GrupIntro</div>
+        <div class="adm-topbar-sep"></div>
+        <div class="adm-topbar-sub">Admin Panel</div>
+      </div>
+      <div class="adm-topbar-right">
+        <span style="font-size:0.78rem;color:var(--admin-muted);font-weight:700;">👤 Admin</span>
+        <button class="adm-back-btn" onclick="closeAdminOverlay()">← Kembali</button>
+        <button class="adm-logout-btn" id="adm-logoutBtn">Logout</button>
       </div>
     </div>
-  `).join('');
-}
 
-// ── Playback ──
-function playTrack(i){
-  if(i<0||i>=tracks.length) return;
-  const t=tracks[i];
-  currentIdx=i;
-  isPlaying=false;
-  updatePlayerUI(t);
-  renderTracks();
-  updateContentBg(t.art);
-  clearInterval(progTimer);
-  toast(`▶ ${t.name}`);
-  if(!ytReady){ ytPending=t.videoId; return; }
-  _doPlay(t.videoId);
-}
+    <div class="adm-stats-row" id="adm-statsRow">
+      <div class="adm-stat-card"><div class="adm-stat-num" id="adm-statTotal">0</div><div class="adm-stat-label">Total Member</div></div>
+      <div class="adm-stat-card"><div class="adm-stat-num" id="adm-statOwner" style="color:#ffd700;">0</div><div class="adm-stat-label">Owner</div></div>
+      <div class="adm-stat-card"><div class="adm-stat-num" id="adm-statAdmin">0</div><div class="adm-stat-label">Admin</div></div>
+      <div class="adm-stat-card"><div class="adm-stat-num" id="adm-statMember" style="color:#4dd0e1;">0</div><div class="adm-stat-label">Member</div></div>
+      <div class="adm-stat-card"><div class="adm-stat-num" id="adm-statAnomali" style="color:#ce93d8;">0</div><div class="adm-stat-label">Anomali</div></div>
+      <div class="adm-stat-card"><div class="adm-stat-num" id="adm-statDev" style="color:#81c784;">0</div><div class="adm-stat-label">Dev</div></div>
+      <div class="adm-stat-card"><div class="adm-stat-num" id="adm-statInfo" style="color:#ff80ab;">0</div><div class="adm-stat-label">Total Info</div></div>
+    </div>
 
-function setPlayUI(playing){
-  document.getElementById('pbPlay').textContent=playing?'⏸':'▶';
-  document.getElementById('snpBtn').textContent=playing?'⏸':'▶';
-}
+    <div class="adm-content">
+      <div class="adm-section-title">📋 Semua Intro Member</div>
+      <div class="adm-filters">
+        <button class="adm-filter-btn active" data-admfilter="ALL">Semua</button>
+        <button class="adm-filter-btn" data-admfilter="OWNER">👑 Owner</button>
+        <button class="adm-filter-btn" data-admfilter="ADMIN">🌸 Admin</button>
+        <button class="adm-filter-btn" data-admfilter="MEMBER">💙 Member</button>
+        <button class="adm-filter-btn" data-admfilter="ANOMALI">🌀 Anomali</button>
+        <input class="adm-search-box" placeholder="🔍 Cari nama..." id="adm-searchBox"/>
+      </div>
+      <div class="adm-table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th><th>Foto</th><th>Nama</th><th>Umur</th><th>Asal</th>
+              <th>Gender</th><th>Label</th><th>Komentar Admin</th><th>Tanggal</th><th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="adm-tableBody"></tbody>
+        </table>
+        <div class="adm-empty-admin" id="adm-emptyAdmin" style="display:none;">
+          <div style="font-size:2.5rem;margin-bottom:10px;">🌸</div>
+          <p>Belum ada intro yang masuk.</p>
+        </div>
+      </div>
+    </div>
 
-function updatePlayerUI(t){
-  document.getElementById('pbArt').src=t.art||'https://placehold.co/52x52/201535/c9a7eb?text=♪';
-  document.getElementById('pbName').textContent=t.name;
-  document.getElementById('pbArtist').textContent=t.artist;
-  document.getElementById('pbPlay').textContent='▶';
-  document.getElementById('pbTot').textContent='--:--';
-  document.getElementById('pbFill').style.width='0%';
-  document.getElementById('pbCur').textContent='0:00';
-  document.getElementById('pbLove').textContent=loved.has(t.id)?'♥':'♡';
-  document.getElementById('pbLove').className='pb-love'+(loved.has(t.id)?' loved':'');
-  document.getElementById('pbTrack').className='pb-track has-song';
-  document.getElementById('snpArt').src=t.art||'https://placehold.co/42x42/201535/c9a7eb?text=♪';
-  document.getElementById('snpName').textContent=t.name;
-  document.getElementById('snpArtist').textContent=t.artist;
-}
+    <div class="adm-info-section-wrap">
+      <div class="adm-section-title">📢 Kelola Info & Pengumuman</div>
+      <div class="adm-info-form-card">
+        <div style="font-size:0.75rem;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;color:var(--admin-accent);margin-bottom:16px;">➕ Tambah Info Baru</div>
+        <div style="margin-bottom:12px;">
+          <div style="font-size:0.72rem;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;color:var(--admin-muted);margin-bottom:8px;">Tipe Info</div>
+          <div class="adm-itype-picker">
+            <button class="adm-itype-btn active-umum" data-itype="umum">📌 Umum</button>
+            <button class="adm-itype-btn" data-itype="urgent">🚨 Urgent</button>
+            <button class="adm-itype-btn" data-itype="info">ℹ️ Info</button>
+            <button class="adm-itype-btn" data-itype="event">🎉 Event</button>
+            <button class="adm-itype-btn" data-itype="dev">⚙️ Dev</button>
+          </div>
+        </div>
+        <div class="adm-info-form-grid">
+          <div class="adm-info-field adm-info-form-full">
+            <label>Judul</label>
+            <input type="text" id="adm-infoTitle" placeholder="Judul pengumuman..."/>
+          </div>
+          <div class="adm-info-field adm-info-form-full">
+            <label>Isi Info</label>
+            <textarea id="adm-infoContent" rows="4" placeholder="Tulis info atau pengumuman di sini..."></textarea>
+          </div>
+          <div class="adm-info-field">
+            <label>Dari (Nama Admin)</label>
+            <input type="text" id="adm-infoAuthor" placeholder="Admin / Owner..." value="Admin"/>
+          </div>
+          <div class="adm-info-field adm-info-form-full">
+            <label>🖼️ Link Foto (opsional)</label>
+            <input type="url" id="adm-infoPhoto" placeholder="https://i.ibb.co/xxx/foto.jpg — kosongkan jika tidak ada foto"/>
+          </div>
+        </div>
+        <button class="adm-add-info-btn" id="adm-addInfoBtn">📢 Posting Info</button>
+      </div>
+      <div class="adm-section-title">📋 Daftar Info Aktif</div>
+      <div id="adm-infoAdminList"><div class="adm-info-empty-admin">Belum ada info yang diposting.</div></div>
+    </div>
+  </div>
 
-function togglePlay(){
-  if(currentIdx===-1){ if(tracks.length) playTrack(0); return; }
-  if(!ytReady||!ytPlayer) return;
-  try{
-    const state=ytPlayer.getPlayerState();
-    if(state===YT.PlayerState.PLAYING) ytPlayer.pauseVideo();
-    else ytPlayer.playVideo();
-  }catch(e){}
-}
+  <!-- MODAL KOMENTAR -->
+  <div class="adm-modal-overlay" id="adm-modalComment">
+    <div class="adm-modal-box">
+      <div class="adm-modal-title">💬 Komentar Admin</div>
+      <div class="adm-modal-sub" id="adm-modalCommentSub">Tambah komentar untuk member ini</div>
+      <div class="adm-modal-field">
+        <label>Komentar</label>
+        <textarea id="adm-commentInput" rows="4" placeholder="Tulis komentar untuk member ini..."></textarea>
+      </div>
+      <div class="adm-modal-actions">
+        <button class="adm-modal-cancel" id="adm-commentCancel">Batal</button>
+        <button class="adm-modal-confirm" id="adm-commentConfirm">💾 Simpan</button>
+      </div>
+    </div>
+  </div>
 
-function playNext(){ if(tracks.length) playTrack((currentIdx+1)%tracks.length); }
-function playPrev(){ if(tracks.length) playTrack((currentIdx-1+tracks.length)%tracks.length); }
+  <!-- MODAL LABEL -->
+  <div class="adm-modal-overlay" id="adm-modalLabel">
+    <div class="adm-modal-box">
+      <div class="adm-modal-title">🏷️ Atur Label</div>
+      <div class="adm-modal-sub" id="adm-modalLabelSub">Pilih label untuk member ini</div>
+      <div class="adm-modal-field">
+        <label>Pilih Label</label>
+        <div class="adm-label-picker">
+          <div class="adm-label-opt" data-lbl="OWNER">👑 OWNER</div>
+          <div class="adm-label-opt" data-lbl="ADMIN">🌸 ADMIN</div>
+          <div class="adm-label-opt" data-lbl="MEMBER">💙 MEMBER</div>
+          <div class="adm-label-opt" data-lbl="ANOMALI">🌀 ANOMALI</div>
+          <div class="adm-label-opt" data-lbl="DEV">⚙️ DEV</div>
+        </div>
+      </div>
+      <div class="adm-modal-actions">
+        <button class="adm-modal-cancel" id="adm-labelCancel">Batal</button>
+        <button class="adm-modal-confirm" id="adm-labelConfirm">💾 Simpan</button>
+      </div>
+    </div>
+  </div>
 
-function seekTo(e){
-  if(currentIdx===-1||!ytReady||!ytPlayer) return;
-  const bar=document.getElementById('pbBar');
-  const r=bar.getBoundingClientRect();
-  const pct=Math.max(0,Math.min(1,(e.clientX-r.left)/r.width));
-  try{ const dur=ytPlayer.getDuration()||0; if(dur) ytPlayer.seekTo(pct*dur,true); }catch(e){}
-}
+  <!-- MODAL HAPUS -->
+  <div class="adm-modal-overlay" id="adm-modalDelete">
+    <div class="adm-modal-box">
+      <div class="adm-modal-title">🗑️ Hapus Intro?</div>
+      <div class="adm-modal-sub" id="adm-modalDeleteSub">Yakin mau hapus intro ini? Ga bisa balik lagi ya!</div>
+      <div class="adm-modal-actions">
+        <button class="adm-modal-cancel" id="adm-deleteCancel">Batal</button>
+        <button class="adm-modal-confirm" id="adm-deleteConfirm" style="background:linear-gradient(135deg,#f44336,#e53935);">🗑️ Hapus</button>
+      </div>
+    </div>
+  </div>
 
-function setVol(v){
-  const pct=parseFloat(v);
-  try{ if(ytPlayer&&ytReady) ytPlayer.setVolume(pct); }catch(e){}
-  const sl=document.getElementById('volSlider');
-  sl.style.background=`linear-gradient(90deg,var(--lavender) ${pct}%,rgba(255,255,255,0.15) ${pct}%)`;
-}
+  <div class="adm-toast" id="adm-toast"></div>
+</div>
 
-function updateContentBg(artUrl){
-  if(!artUrl) return;
-  let fixedBg=document.getElementById('contentFixedBg');
-  if(!fixedBg){
-    fixedBg=document.createElement('div');
-    fixedBg.id='contentFixedBg';
-    fixedBg.style.cssText='position:fixed;top:60px;bottom:82px;right:0;left:var(--sidebar-w,260px);pointer-events:none;z-index:0;transition:background-image 1.2s ease;';
-    document.body.appendChild(fixedBg);
-  }
-  fixedBg.style.backgroundImage=`url('${artUrl}')`;
-  fixedBg.style.backgroundSize='cover';
-  fixedBg.style.backgroundPosition='center';
-  fixedBg.style.filter='blur(60px) saturate(1.3) brightness(0.35)';
-}
+<!-- ===== SECURITY (load pertama) ===== -->
+<script src="Security.js"></script>
 
-function toggleLove(){
-  if(currentIdx===-1) return;
-  toggleLoveTrack(currentIdx);
-  const t=tracks[currentIdx];
-  document.getElementById('pbLove').textContent=loved.has(t.id)?'♥':'♡';
-  document.getElementById('pbLove').className='pb-love'+(loved.has(t.id)?' loved':'');
-}
-function toggleLoveTrack(i){
-  const t=tracks[i];
-  if(loved.has(t.id)){loved.delete(t.id);toast('Dihapus dari favorit');}
-  else{loved.add(t.id);toast('♥ Ditambah ke favorit!');}
-  renderTracks();
-}
+<!-- ===== MAIN APP LOGIC ===== -->
+<script src="main.js"></script>
 
-// ── Search ──
-let st=null;
-function onSearch(v){ clearTimeout(st); if(!v.trim()) return; st=setTimeout(()=>searchTracks(v),650); }
-function doSearch(){ const v=document.getElementById('searchInput').value; if(v.trim()) searchTracks(v); }
-async function searchTracks(term){
-  document.getElementById('sectionTitle').textContent=`✦ Hasil: "${term}"`;
-  showLoader();
-  try{
-    const res=await fetch(`/api/search?query=${encodeURIComponent(term)}`);
-    const data=await res.json();
-    if(data.status==='success'){
-      tracks=data.data.map((t,i)=>({
-        idx:i,id:t.videoId,videoId:t.videoId,
-        name:t.title,artist:t.artist||'Unknown',
-        art:t.thumbnail||'https://placehold.co/300x300/201535/c9a7eb?text=♪',
-        duration:0,genre:'Music'
-      }));
-      renderTracks();
+<!-- ===== FIREBASE (module) ===== -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import {
+    getFirestore, collection, doc, addDoc, updateDoc, deleteDoc,
+    onSnapshot, query, orderBy, serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import {
+    getMessaging, getToken, onMessage
+  } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-messaging.js";
+
+  var firebaseConfig = {
+    apiKey: "AIzaSyABbV5Ap3YcGxT6UYE4BVgPlTU63EVYArA",
+    authDomain: "website-intro-ab3e7.firebaseapp.com",
+    projectId: "website-intro-ab3e7",
+    storageBucket: "website-intro-ab3e7.firebasestorage.app",
+    messagingSenderId: "1064015162632",
+    appId: "1:1064015162632:web:3cf509802b21c195c690bd",
+    measurementId: "G-2W8LKDJGLC"
+  };
+
+  var app = initializeApp(firebaseConfig);
+  var db  = getFirestore(app);
+  var fbStatus = document.getElementById('fb-status');
+  fbStatus.style.display = 'block';
+
+  // ===== FIRESTORE REALTIME =====
+  var introsRef   = collection(db, 'intros');
+  var introsQuery = query(introsRef, orderBy('createdAt', 'desc'));
+
+  // Track known IDs supaya bisa bedain data baru vs lama
+  var _knownIntroIds = new Set();
+  var _firstIntroSnap = true;
+
+  onSnapshot(introsQuery, function(snapshot) {
+    window.intros = snapshot.docs.map(function(d) { return Object.assign({ _id: d.id }, d.data()); });
+    fbStatus.style.display = 'none';
+    if (document.getElementById('daftar').classList.contains('active')) renderCards();
+
+    // Push notif: ada intro baru (skip snapshot pertama)
+    if (_firstIntroSnap) {
+      snapshot.docs.forEach(function(d) { _knownIntroIds.add(d.id); });
+      _firstIntroSnap = false;
+    } else {
+      snapshot.docChanges().forEach(function(change) {
+        if (change.type === 'added' && !_knownIntroIds.has(change.doc.id)) {
+          _knownIntroIds.add(change.doc.id);
+          var data = change.doc.data();
+          // Tampilkan push notif via Service Worker
+          _sendPushNotif({
+            title: '💌 Intro Baru Masuk!',
+            body: (data.nama || 'Seseorang') + ' dari ' + (data.asal || '?') + ' baru aja intro~ 🌸',
+            tag: 'intro-' + change.doc.id,
+            type: 'intro'
+          });
+        }
+      });
     }
-  }catch(e){ toast('Search gagal'); }
-}
-
-function pickGenre(el,g){
-  document.querySelectorAll('.genre-item').forEach(x=>x.classList.remove('active'));
-  el.classList.add('active');
-  document.getElementById('sectionTitle').textContent=g?`✦ ${g}`:'✦ Lagu Populer';
-  fetchTracks(g?g+' musik hits terbaik':'top hits indonesia 2024');
-}
-
-document.querySelectorAll('.nav-item').forEach(el=>{
-  el.addEventListener('click',()=>{
-    document.querySelectorAll('.nav-item').forEach(x=>x.classList.remove('active'));
-    el.classList.add('active');
+  }, function(err) {
+    fbStatus.textContent = '❌ Gagal konek database';
+    console.error('Intros error:', err);
   });
-});
 
-function fmt(s){ s=Math.max(0,Math.floor(s)); const m=Math.floor(s/60); return `${m}:${String(s%60).padStart(2,'0')}`; }
-function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-function toast(msg){
-  const t=document.getElementById('toast');
-  t.textContent=msg;t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),2400);
+  var infosRef   = collection(db, 'infos');
+  var infosQuery = query(infosRef, orderBy('createdAt', 'desc'));
+
+  var _knownInfoIds = new Set();
+  var _firstInfoSnap = true;
+
+  onSnapshot(infosQuery, function(snapshot) {
+    window.infos = snapshot.docs.map(function(d) { return Object.assign({ _id: d.id }, d.data()); });
+    if (document.getElementById('info').classList.contains('active')) renderInfoPage();
+    if (window.daftarTab === 'info') renderInfoInDaftar();
+
+    if (_firstInfoSnap) {
+      snapshot.docs.forEach(function(d) { _knownInfoIds.add(d.id); });
+      _firstInfoSnap = false;
+    } else {
+      snapshot.docChanges().forEach(function(change) {
+        if (change.type === 'added' && !_knownInfoIds.has(change.doc.id)) {
+          _knownInfoIds.add(change.doc.id);
+          var data = change.doc.data();
+          var icon = { umum:'📌', urgent:'🚨', info:'ℹ️', event:'🎉', dev:'⚙️' }[data.type] || '📢';
+          _sendPushNotif({
+            title: icon + ' ' + (data.title || 'Info Baru'),
+            body: (data.content || '').substring(0, 100),
+            tag: 'info-' + change.doc.id,
+            type: data.type || 'info'
+          });
+        }
+      });
+    }
+  }, function(err) {
+    console.error('Infos error:', err);
+  });
+
+  // ===== FIREBASE ADMIN HELPERS =====
+  window._fbAdminUpdate = async function(col, id, data) {
+    await updateDoc(doc(db, col, id), data);
+  };
+  window._fbAdminDelete = async function(col, id) {
+    await deleteDoc(doc(db, col, id));
+  };
+  window._fbAdminAdd = async function(col, data) {
+    var ref = await addDoc(collection(db, col), data);
+    return { name: ref.id };
+  };
+
+  // ===== SUBMIT INTRO =====
+  window.fbSubmitIntro = async function(entry) {
+    var btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.textContent = '⏳ Mengirim...';
+    try {
+      await addDoc(introsRef, {
+        nama: entry.nama, umur: entry.umur, asal: entry.asal,
+        gender: entry.gender, hobi: entry.hobi,
+        visual: entry.visual, label: entry.label,
+        ts: new Date().toLocaleDateString('id-ID'),
+        createdAt: serverTimestamp()
+      });
+      resetForm();
+      document.getElementById('successPopup').classList.add('show');
+    } catch(err) {
+      console.error(err);
+      alert('❌ Gagal kirim intro. Coba lagi ya!');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '🌸 Kirim Intro Gue!';
+    }
+  };
+
+  // ===== WEB PUSH NOTIFICATION SYSTEM =====
+
+  // VAPID KEY — ambil dari Firebase Console → Project Settings → Cloud Messaging → Web push certificates
+  var VAPID_KEY = 'BPFvW6Zz47DnIsFlQFmFVqgZKbs5AkelW2JctbmJx2IOLVWqFFQ9GoFJL8lENonFmKvUhT-nLa0DSjXQ7GGO_JM';
+
+  var _messaging = null;
+  var _swReg = null;
+  var _pushReady = false;
+
+  // Init: daftarkan Service Worker & minta izin notifikasi
+  async function _initPush() {
+    if (!('serviceWorker' in navigator) || !('Notification' in window)) return;
+    try {
+      _swReg = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+      console.log('[Push] SW registered');
+
+      _messaging = getMessaging(app);
+
+      // Foreground message handler — muncul notif browser walau tab aktif
+      onMessage(_messaging, function(payload) {
+        var n = payload.notification || {};
+        _showBrowserNotif(n.title || '🌸 GrupIntro', n.body || '', payload.data || {});
+      });
+
+      // Cek / minta izin
+      if (Notification.permission === 'granted') {
+        await _subscribeToken();
+        _pushReady = true;
+      } else if (Notification.permission === 'default') {
+        _showPermBanner();
+      }
+    } catch(e) {
+      console.warn('[Push] Init error:', e);
+    }
+  }
+
+  // Ambil & simpan FCM token ke Firestore
+  async function _subscribeToken() {
+    if (!_messaging || VAPID_KEY === 'GANTI_DENGAN_VAPID_KEY_KAMU') return;
+    try {
+      var token = await getToken(_messaging, {
+        vapidKey: VAPID_KEY,
+        serviceWorkerRegistration: _swReg
+      });
+      if (token) {
+        console.log('[Push] Token OK:', token.substring(0,20) + '...');
+        // Simpan token ke Firestore collection 'push_tokens'
+        // Admin bisa pakai ini untuk blast notif lewat Firebase Cloud Messaging
+        try {
+          await addDoc(collection(db, 'push_tokens'), {
+            token: token,
+            ua: navigator.userAgent.substring(0, 120),
+            savedAt: serverTimestamp()
+          });
+        } catch(_) {}
+      }
+    } catch(e) {
+      console.warn('[Push] getToken error:', e);
+    }
+  }
+
+  // Tampilkan notifikasi langsung via Notification API
+  function _showBrowserNotif(title, body, data) {
+    if (Notification.permission !== 'granted') return;
+    var options = {
+      body: body,
+      icon: '/favicon.ico',
+      badge: '/favicon.ico',
+      tag: data.tag || 'gi-' + Date.now(),
+      data: data,
+      vibrate: [200, 100, 200],
+      requireInteraction: data.type === 'urgent'
+    };
+    var notif = new Notification(title, options);
+    notif.onclick = function() {
+      window.focus();
+      notif.close();
+    };
+  }
+
+  // Kirim push notif (saat app terbuka = pakai Notification API langsung)
+  function _sendPushNotif(opts) {
+    _showBrowserNotif(opts.title, opts.body, { tag: opts.tag, type: opts.type });
+  }
+  window._sendPushNotif = _sendPushNotif;
+
+  // ===== BANNER MINTA IZIN NOTIFIKASI =====
+  function _showPermBanner() {
+    if (document.getElementById('gi-perm-banner')) return;
+    var banner = document.createElement('div');
+    banner.id = 'gi-perm-banner';
+    banner.innerHTML =
+      '<div class="gi-pb-inner">' +
+        '<span class="gi-pb-bell">🔔</span>' +
+        '<div class="gi-pb-text">' +
+          '<b>Aktifkan Notifikasi HP!</b>' +
+          '<span>Biar tau kalau ada intro baru & info dari admin 💕</span>' +
+        '</div>' +
+        '<button id="gi-pb-yes">Izinkan</button>' +
+        '<button id="gi-pb-no">Nanti</button>' +
+      '</div>';
+    document.body.appendChild(banner);
+
+    // CSS
+    var s = document.createElement('style');
+    s.textContent = `
+#gi-perm-banner {
+  position:fixed;bottom:-110px;left:0;right:0;z-index:99999;
+  padding:0 12px 12px;
+  transition:bottom 0.4s cubic-bezier(0.34,1.2,0.64,1);
 }
+#gi-perm-banner.show { bottom:0; }
+.gi-pb-inner {
+  background:rgba(255,255,255,0.97);
+  backdrop-filter:blur(20px);
+  border:1.5px solid rgba(240,98,146,0.3);
+  border-radius:20px;
+  padding:14px 16px;
+  display:flex;align-items:center;gap:10px;
+  box-shadow:0 -4px 32px rgba(240,98,146,0.18);
+}
+.gi-pb-bell { font-size:1.8rem;flex-shrink:0; }
+.gi-pb-text { flex:1; }
+.gi-pb-text b { display:block;font-size:0.88rem;font-weight:900;color:#5a2a3a;margin-bottom:2px; }
+.gi-pb-text span { font-size:0.75rem;color:#c2708a; }
+#gi-pb-yes {
+  padding:9px 16px;border-radius:12px;border:none;
+  background:linear-gradient(135deg,#f06292,#ec407a);
+  color:#fff;font-weight:900;font-size:0.82rem;cursor:pointer;
+  box-shadow:0 3px 12px rgba(236,64,122,0.35);white-space:nowrap;
+  transition:all 0.2s;
+}
+#gi-pb-yes:hover { transform:translateY(-1px);box-shadow:0 5px 16px rgba(236,64,122,0.45); }
+#gi-pb-no {
+  padding:9px 12px;border-radius:12px;
+  border:1px solid rgba(240,98,146,0.25);background:transparent;
+  color:#c2708a;font-weight:700;font-size:0.82rem;cursor:pointer;
+  white-space:nowrap;transition:all 0.18s;
+}
+#gi-pb-no:hover { background:rgba(240,98,146,0.07); }
+@media(max-width:400px){
+  .gi-pb-inner{flex-wrap:wrap;}
+  .gi-pb-text{width:100%;}
+}
+    `;
+    document.head.appendChild(s);
 
-fetchTracks('top hits indonesia 2024');
-setVol(80);
+    setTimeout(function() { banner.classList.add('show'); }, 300);
+
+    document.getElementById('gi-pb-yes').onclick = async function() {
+      banner.classList.remove('show');
+      setTimeout(function() { banner.remove(); }, 500);
+      var perm = await Notification.requestPermission();
+      if (perm === 'granted') {
+        await _subscribeToken();
+        _pushReady = true;
+        // Test notif
+        _showBrowserNotif('🌸 Notifikasi Aktif!', 'Kamu bakal dapet notif kalau ada intro baru atau info dari admin 💕', { tag: 'welcome' });
+      }
+    };
+    document.getElementById('gi-pb-no').onclick = function() {
+      banner.classList.remove('show');
+      setTimeout(function() { banner.remove(); }, 500);
+      localStorage.setItem('gi_push_declined', '1');
+    };
+  }
+
+  // Jalankan init push setelah halaman load
+  if (!localStorage.getItem('gi_push_declined')) {
+    window.addEventListener('load', _initPush);
+  }
+
 </script>
+
 </body>
 </html>
